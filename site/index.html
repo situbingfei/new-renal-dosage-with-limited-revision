@@ -1,0 +1,1064 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>肾功能与抗肿瘤剂量计算辅助平台</title>
+<style>
+:root{
+  --ink:#17334f;--ink-2:#254763;--muted:#6d8194;--line:#dfe8ef;--paper:#fff;--canvas:#f3f7fa;
+  --navy:#102d49;--teal:#0e9f91;--teal-soft:#e8f7f5;--blue:#3d78a5;--blue-soft:#edf5fb;
+  --amber:#bd7914;--amber-soft:#fff7e9;--red:#b64c48;--red-soft:#fff0ee;--green:#29816e;--green-soft:#eaf7f1;
+  --shadow:0 8px 28px rgba(27,62,88,.07);--radius:18px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--canvas);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;line-height:1.55}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.shell{width:min(1200px,calc(100% - 40px));margin:0 auto}
+.hero{position:relative;overflow:hidden;color:#fff;background:linear-gradient(115deg,#102c49 0%,#16475b 66%,#117f7a 130%);padding:28px 0 0}
+.hero:after{content:"";position:absolute;width:470px;height:470px;border:1px solid rgba(255,255,255,.11);border-radius:50%;right:-130px;top:-285px;box-shadow:0 0 0 48px rgba(255,255,255,.035),0 0 0 100px rgba(255,255,255,.025);pointer-events:none}
+.masthead{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:24px;padding-bottom:24px}
+.brand{display:flex;align-items:center;gap:15px;min-width:0}
+.brand-icon{width:52px;height:52px;flex:0 0 52px;border:1px solid rgba(255,255,255,.25);border-radius:16px;background:rgba(255,255,255,.09);display:grid;place-items:center}
+.brand-icon svg{width:31px;height:31px}
+.eyebrow{margin:0 0 3px;color:#9fced0;font-size:10px;font-weight:800;letter-spacing:.19em;text-transform:uppercase}
+h1{margin:0;color:#fff;font-size:clamp(22px,3vw,30px);line-height:1.2;letter-spacing:.01em}
+.subtitle{margin:5px 0 0;color:#c7d9e4;font-size:13px}
+.hero-meta{display:flex;align-items:center;gap:22px;position:relative;z-index:1}
+.local-badge{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid rgba(209,241,236,.25);border-radius:999px;color:#d4f4ed;background:rgba(9,34,51,.24);font-size:11px;font-weight:700;white-space:nowrap}
+.local-dot{width:7px;height:7px;border-radius:50%;background:#6de2c0;box-shadow:0 0 0 4px rgba(109,226,192,.12)}
+.record-count{min-width:74px;text-align:center;border-left:1px solid rgba(255,255,255,.2);padding-left:20px}
+.record-count b{display:block;font-size:22px;line-height:1.1;color:#fff}
+.record-count span{display:block;color:#bfd2df;font-size:10px;letter-spacing:.08em}
+.nav{position:relative;z-index:1;display:flex;gap:7px;overflow-x:auto;padding:0 0 14px;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav button{color:#d3e3ea;text-decoration:none;border:1px solid transparent;border-radius:999px;padding:7px 13px;background:transparent;font-size:12px;white-space:nowrap;transition:.2s}
+.nav button:hover,.nav button:focus-visible,.nav button.active{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff;outline:none}
+.section-nav{position:relative;z-index:1;display:flex;gap:6px;overflow-x:auto;padding:0 0 13px;scrollbar-width:none}
+.section-nav::-webkit-scrollbar{display:none}
+.section-nav a{color:#b8d3dc;text-decoration:none;border-radius:999px;padding:4px 10px;font-size:10px;white-space:nowrap}
+.section-nav a:hover,.section-nav a:focus-visible{background:rgba(255,255,255,.08);color:#fff;outline:none}
+main{padding:22px 0 50px}
+.module-home{max-width:1000px;margin:0 auto;padding:20px 0 54px}
+.module-home-head{text-align:center;margin:0 auto 24px;max-width:690px}
+.home-kicker,.view-kicker{display:block;color:#238e84;font-size:9px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}
+.module-home-head h2{margin:6px 0;color:#173b56;font-size:clamp(23px,4vw,32px);letter-spacing:-.035em}
+.module-home-head p{margin:0;color:#718596;font-size:12px;line-height:1.7}
+.module-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.module-card{position:relative;display:flex;flex-direction:column;align-items:flex-start;min-height:255px;text-align:left;padding:25px;border:1px solid #dce8ed;border-radius:20px;background:linear-gradient(145deg,#fff,#f9fcfd);box-shadow:0 10px 32px rgba(27,62,88,.07);color:var(--ink);transition:transform .18s,box-shadow .18s,border-color .18s}
+.module-card:hover,.module-card:focus-visible{transform:translateY(-3px);border-color:#86c6be;box-shadow:0 16px 38px rgba(27,62,88,.12);outline:none}
+.module-card.database-module{background:linear-gradient(145deg,#fff,#f5faf9)}
+.module-icon{display:grid;place-items:center;width:48px;height:48px;margin-bottom:17px;border-radius:15px;background:#e8f7f4;color:#13877c;font-size:24px;font-weight:600}
+.database-module .module-icon{background:#edf4f9;color:#3b7698}
+.module-card-title{color:#1b405a;font-size:19px;font-weight:850;letter-spacing:-.02em}
+.module-card-copy{max-width:420px;margin-top:8px;color:#728697;font-size:12px;line-height:1.75}
+.module-card-cta{display:flex;align-items:center;justify-content:space-between;gap:18px;width:100%;margin-top:auto;padding-top:23px;color:#17877c;font-size:11px;font-weight:850}
+.module-card-cta b{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#edf8f6;font-size:15px}
+.database-module .module-card-cta{color:#3e7795}.database-module .module-card-cta b{background:#edf4f9}
+.module-sync-note{display:flex;gap:11px;align-items:center;margin:18px 0 0;padding:12px 15px;border:1px solid #dce9ef;border-radius:12px;background:#f7fafc;color:#6e8595;font-size:10px}
+.module-sync-note b,.module-sync-note span{display:block}.module-sync-note b{margin-bottom:2px;color:#365d72;font-size:11px}.module-sync-dot{width:9px;height:9px;flex:0 0 9px;border-radius:50%;background:#28a08f;box-shadow:0 0 0 4px #e4f4f0}
+.app-view{animation:view-in .18s ease-out}
+@keyframes view-in{from{opacity:.65;transform:translateY(4px)}to{opacity:1;transform:none}}
+.view-toolbar{display:flex;align-items:center;justify-content:space-between;gap:15px;margin:0 0 17px;padding:15px 18px;border:1px solid #dce8ed;border-radius:15px;background:#fff;box-shadow:var(--shadow)}
+.view-toolbar h2{margin:2px 0 0;color:#183d58;font-size:19px;line-height:1.25}
+.view-toolbar p{margin:4px 0 0;color:#7b8d9b;font-size:10px}
+.view-home-button{flex:0 0 auto;border:1px solid #dce6ed;border-radius:9px;background:#fff;padding:8px 11px;color:#587388;font-size:10px;font-weight:800}
+.view-home-button:hover{border-color:#86bdb7;background:#f3fbf9;color:#18776f}
+.safety-banner{display:flex;gap:13px;align-items:flex-start;border:1px solid #f1d7a9;background:var(--amber-soft);border-radius:15px;padding:13px 16px;margin-bottom:18px;color:#6d4a1b}
+.safety-banner .alert-icon{width:22px;height:22px;flex:0 0 22px;margin-top:1px;color:#bd7914}
+.safety-banner strong{display:block;font-size:13px;margin-bottom:2px;color:#77500f}
+.safety-banner p{margin:0;font-size:12px;line-height:1.65}
+.safety-banner b{font-weight:800}
+.section-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.workspace-grid{display:grid;grid-template-columns:minmax(310px, .88fr) minmax(0,1.42fr);gap:18px;align-items:stretch}
+.patient-card,.results-card,.drug-card,.qr-card,.ref-card{padding:22px}
+.section-heading{display:flex;align-items:flex-start;gap:12px;margin-bottom:19px}
+.section-number{width:34px;height:34px;flex:0 0 34px;border-radius:11px;background:#eaf3f8;color:#397596;display:grid;place-items:center;font-size:12px;font-weight:800;letter-spacing:.03em}
+.section-heading h2{margin:0;font-size:18px;line-height:1.25;letter-spacing:-.02em;color:var(--ink)}
+.section-heading p{margin:4px 0 0;color:var(--muted);font-size:11px}
+.section-heading .heading-actions{margin-left:auto}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px 12px}
+.field{display:block;min-width:0}
+.field.full{grid-column:1/-1}
+.field-label{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px;color:#456078;font-size:11px;font-weight:700}
+.field-label small{font-size:10px;color:#8999a8;font-weight:500}
+.control{width:100%;height:43px;display:flex;align-items:center;border:1px solid #d8e3eb;border-radius:10px;background:#fbfdfe;overflow:hidden;transition:.18s}
+.control:focus-within{border-color:#6cbab0;box-shadow:0 0 0 3px rgba(14,159,145,.1);background:#fff}
+.control input,.control select{width:100%;height:100%;min-width:0;border:0;outline:none;background:transparent;color:var(--ink);padding:0 11px;font-size:13px}
+.control input::placeholder{color:#b4c0ca}
+.control input:disabled{color:#94a4b0;background:#f4f7f9;cursor:not-allowed}
+.control select{padding-right:8px;color:#536d81}
+.suffix{flex:0 0 auto;padding:0 11px;color:#7a8e9e;font-size:11px;white-space:nowrap;border-left:1px solid #e3ebf0}
+.inline-control{display:flex;gap:8px}
+.inline-control .control{flex:1}
+.inline-control .control.unit-control{flex:0 0 102px}
+.inline-control .control.unit-control select{padding-left:8px;font-size:11px}
+.sex-options{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sex-option{position:relative}
+.sex-option input{position:absolute;opacity:0;inset:0}
+.sex-option span{min-height:43px;border:1px solid #d8e3eb;border-radius:10px;background:#fbfdfe;display:flex;align-items:center;justify-content:center;gap:8px;color:#627a8d;font-size:12px;cursor:pointer;transition:.18s}
+.sex-option span:before{content:"";width:8px;height:8px;border-radius:50%;border:1.5px solid #aabac6;background:white}
+.sex-option input:checked+span{color:#146e68;background:#eff9f7;border-color:#76c3b9;font-weight:800}
+.sex-option input:checked+span:before{border:3px solid #11988d}
+.sex-option input:focus-visible+span{outline:3px solid rgba(14,159,145,.18)}
+.method-options{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.method-option{position:relative;min-width:0}
+.method-option input{position:absolute;opacity:0;inset:0}
+.method-option span{display:flex;min-height:59px;flex-direction:column;justify-content:center;gap:2px;padding:8px;border:1px solid #d8e3eb;border-radius:10px;background:#fbfdfe;color:#61788a;cursor:pointer;transition:.18s}
+.method-option b{font-size:11px;color:#3f5f75}
+.method-option small{font-size:9px;line-height:1.35;color:#8798a5}
+.method-option input:checked+span{border-color:#73bdb3;background:#eff9f7;box-shadow:inset 0 0 0 1px rgba(14,159,145,.08)}
+.method-option input:checked+span b{color:#14756d}
+.method-option input:focus-visible+span{outline:3px solid rgba(14,159,145,.18)}
+.weight-sync{margin-top:8px;display:flex;align-items:center;gap:7px;color:#7b8d9b;font-size:10px}
+.weight-sync input{accent-color:var(--teal)}
+.input-help{margin:5px 0 0;color:#8999a7;font-size:10px;line-height:1.5}
+.patient-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px;padding-top:14px;border-top:1px solid #edf1f4}
+.patient-actions-right{display:flex;align-items:center;gap:10px}
+.calc-status{color:#8293a0;font-size:10px}
+.calc-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:10px;background:linear-gradient(110deg,#127f78,#18a496);color:#fff;padding:10px 15px;font-size:12px;font-weight:800;box-shadow:0 5px 13px rgba(14,159,145,.18);transition:.18s}
+.calc-button:hover{filter:brightness(1.04);transform:translateY(-1px);box-shadow:0 7px 16px rgba(14,159,145,.23)}
+.calc-button:focus-visible{outline:3px solid rgba(14,159,145,.25);outline-offset:2px}
+.ghost-button{border:1px solid #dce6ed;background:#fff;color:#5d7487;padding:7px 11px;border-radius:9px;font-size:11px;font-weight:700;transition:.18s}
+.ghost-button:hover{border-color:#9bb6c8;background:#f8fbfd;color:var(--ink)}
+.metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.metric-card{position:relative;overflow:hidden;border:1px solid #e2ebf0;border-radius:15px;background:#fbfdfe;padding:16px;min-height:143px}
+.metric-card.primary{border-color:#cae9e4;background:linear-gradient(140deg,#effaf8,#fbfefd)}
+.metric-card.stage-metric{background:linear-gradient(140deg,#f0f6fb,#fcfdfe)}
+.metric-top{display:flex;justify-content:space-between;gap:8px;align-items:center;color:#6f8495;font-size:10px;font-weight:800;letter-spacing:.075em;text-transform:uppercase}
+.metric-top .metric-icon{width:25px;height:25px;display:grid;place-items:center;background:#e8f5f3;border-radius:8px;color:var(--teal);font-size:13px}
+.metric-value-row{display:flex;align-items:baseline;gap:8px;margin-top:13px}
+.metric-value{color:#123550;font-size:35px;line-height:1;font-weight:760;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.metric-unit{font-size:10px;color:#73879a;font-weight:600}
+.metric-foot{margin:11px 0 0;color:#7b8e9e;font-size:10px}
+.stage-chip{display:inline-flex;align-items:center;gap:6px;vertical-align:middle;margin-top:9px;padding:4px 9px;border-radius:999px;background:#e6eef5;color:#597085;font-size:10px;font-weight:800}
+.stage-chip.active{background:#e8f6f2;color:#157761}
+.stage-chip.stage-warn{background:#fff3dc;color:#996311}
+.stage-chip.stage-danger{background:#ffebe8;color:#ad4a43}
+.bsa-title{grid-column:1/-1;margin:4px 0 -4px;color:#49647a;font-size:11px;font-weight:800;display:flex;align-items:center;gap:8px}
+.bsa-title:after{content:"";height:1px;background:#e6edf2;flex:1}
+.bsa-card{min-height:96px;border:1px solid #e2ebf0;border-radius:13px;padding:12px 14px;background:#fff}
+.bsa-card .bsa-label{display:flex;justify-content:space-between;align-items:center;color:#6e8294;font-size:10px;font-weight:700}
+.bsa-card .bsa-symbol{display:grid;place-items:center;width:21px;height:21px;border-radius:7px;background:#f0f4fb;color:#547e9b;font-size:10px}
+.bsa-card strong{display:block;margin-top:7px;color:#173b56;font-size:23px;line-height:1.1;font-variant-numeric:tabular-nums}
+.bsa-card strong small{font-size:10px;color:#7c8d9b;font-weight:600}
+.calc-note{margin:13px 0 0;padding:10px 11px;border-radius:10px;background:#f6f9fb;color:#708596;font-size:10px;line-height:1.6}
+.calc-note b{color:#4e6a80}
+.calc-note.warning{border:1px solid #efdfbc;background:var(--amber-soft);color:#77571f}
+.calc-note.warning b{color:#79510f}
+.validation-note{min-height:0;margin-top:5px;color:#a14c43;font-size:10px;line-height:1.55}
+.stage-scale{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:14px}
+.stage-step{border:1px solid #e5edf2;border-radius:8px;padding:6px 4px;text-align:center;color:#8999a6;background:#fff;font-size:9px;line-height:1.4}
+.stage-step b{display:block;font-size:10px;color:#5c7285}
+.stage-step.is-active{border-color:#59b9aa;background:#eaf8f4;color:#277767;box-shadow:inset 0 0 0 1px rgba(14,159,145,.08)}
+.stage-step.is-active b{color:#0f766b}
+.disclaimer-mini{margin-top:12px;border-left:2px solid #b7d9e1;padding-left:10px;color:#8092a0;font-size:10px;line-height:1.55}
+.full-section{margin-top:18px}
+.drug-card{padding-bottom:18px}
+.drug-toolbar{display:grid;grid-template-columns:minmax(220px,.8fr) minmax(280px,1.2fr);gap:12px;align-items:end;margin-bottom:16px}
+.drug-toolbar .field-label{margin-bottom:5px}
+.select-wrap{position:relative}
+.select-wrap .control select{appearance:none;padding-right:34px}
+.select-wrap:after{content:"⌄";position:absolute;right:13px;top:6px;color:#7790a2;font-size:18px;pointer-events:none}
+.count-pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;background:#eef5f8;padding:6px 10px;color:#5e7689;font-size:10px;font-weight:700;margin-top:8px}
+.count-pill i{width:6px;height:6px;background:#37aa9c;border-radius:50%}
+.dose-output{min-height:125px;border:1px solid #e4edf2;border-radius:14px;background:#fbfdfe;padding:15px}
+.empty-state{display:flex;align-items:center;gap:12px;color:#788c9d;font-size:12px;min-height:90px}
+.empty-state .empty-icon{width:35px;height:35px;flex:0 0 35px;border-radius:11px;background:#eef5f8;color:#67869a;display:grid;place-items:center;font-size:16px}
+.dose-alert{padding:11px 12px;border-radius:11px;background:var(--amber-soft);border:1px solid #f0dfbd;color:#795718;font-size:11px;line-height:1.65;margin-bottom:12px}
+.dose-alert.danger{background:var(--red-soft);border-color:#f1d2cf;color:#8b4640}
+.dose-alert.info{background:#eff6fa;border-color:#dceaf1;color:#526d81}
+.match-card{border:1px solid #dfe9ef;border-radius:13px;background:#fff;padding:14px;margin:10px 0}
+.match-card.avoid{border-color:#f0d4d0;background:#fffdfd}
+.match-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:9px}
+.match-head h3{margin:0;color:#163954;font-size:14px}
+.match-range{display:inline-flex;align-items:center;white-space:nowrap;border-radius:999px;padding:4px 8px;background:#eef6f7;color:#31776f;font-size:10px;font-weight:800}
+.match-card.avoid .match-range{background:#ffefed;color:#a64d47}
+.match-level{margin:4px 0 0;color:#8091a0;font-size:10px}
+.raw-label{color:#8798a5;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.raw-dose{margin:5px 0 0;color:#37566d;font-size:12px;line-height:1.7;white-space:pre-wrap}
+.dose-compute{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
+.calc-box{border:1px solid #dcece8;background:#f5fbf9;border-radius:11px;padding:10px 11px;min-width:0}
+.calc-box .calc-label{display:block;color:#5d817d;font-size:9px;font-weight:800;letter-spacing:.04em}
+.calc-box strong{display:block;margin-top:4px;color:#135d58;font-size:15px;line-height:1.4;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.calc-box small{display:block;margin-top:4px;color:#79908f;font-size:9px;line-height:1.45}
+.calc-box.full{grid-column:1/-1}
+.calc-box.fixed{background:#f3f7fb;border-color:#e0e9f0}
+.calc-box.fixed strong{color:#264c68}
+.calc-caution{margin:8px 0 0;color:#8a7956;font-size:10px;line-height:1.55}
+.match-notes{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+.note-tag{padding:4px 8px;border:1px solid #e3ebef;border-radius:8px;color:#61798c;font-size:10px;background:#fbfdfe}
+.note-tag.warn{border-color:#f0dbb7;color:#90621b;background:#fffbf3}
+.source-table-wrap{margin-top:15px;border:1px solid #e2ebf0;border-radius:12px;overflow:hidden}
+.table-caption{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 12px;background:#f7fafb;border-bottom:1px solid #e4edf1;color:#526d82;font-size:11px;font-weight:800}
+.table-caption small{color:#8a9aa7;font-size:9px;font-weight:500}
+.table-scroll{overflow-x:auto}
+table{width:100%;min-width:640px;border-collapse:collapse}
+th,td{padding:9px 10px;border-bottom:1px solid #edf1f4;text-align:left;vertical-align:top;font-size:10px;line-height:1.5}
+th{background:#fbfcfd;color:#7b8d9a;font-size:9px;font-weight:800;white-space:nowrap}
+td{color:#4e687c}
+tbody tr:last-child td{border-bottom:0}
+.qr-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(250px,.8fr);gap:18px;align-items:stretch}
+.dose-recommendation{margin-top:18px;padding-top:16px;border-top:1px solid #e5edf1}
+.dose-recommendation-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.dose-recommendation-head h3{margin:0;color:#274b65;font-size:14px}
+.dose-recommendation-head p{margin:4px 0 0;color:#8293a0;font-size:10px;line-height:1.5}
+.dose-recommendation-head .count-pill{flex:0 0 auto;margin:0}
+.qr-readonly-note{margin:0 0 13px;padding:9px 12px;border:1px solid #dce9ef;border-radius:10px;background:#f6fafb;color:#728797;font-size:10px;line-height:1.6}
+.qr-readonly-note b{color:#48697d}
+.qr-display-shell{display:grid;place-items:center}
+.qr-image-panel{width:min(100%,430px);display:flex;flex-direction:column;align-items:center;gap:10px}
+.qr-current-name{width:100%;padding:9px 12px;border:1px solid #dce9ef;border-radius:10px;background:#fff;color:#5b7487;font-size:11px;font-weight:700;text-align:center;box-shadow:0 3px 10px rgba(25,62,83,.04)}
+.qr-current-name b{color:#1e526b}
+.qr-image-panel img{margin:0 auto;max-width:min(100%,330px);max-height:330px;object-fit:contain}
+.qr-empty-panel{width:min(100%,410px)}
+.qr-intro{color:#718596;font-size:11px;line-height:1.7;margin:-5px 0 14px}
+.qr-warning{border:1px solid #eddcb9;border-radius:11px;background:#fff9ef;padding:11px 12px;color:#795718;font-size:11px;line-height:1.65}
+.qr-warning strong{display:block;margin-bottom:3px;color:#775116}
+.qr-current{margin:13px 0;color:#536f83;font-size:11px}
+.qr-current b{color:#1f4864}
+.qr-upload{display:inline-flex;align-items:center;gap:8px;margin-top:10px;padding:9px 13px;border:1px solid #9acdc5;border-radius:10px;background:#eff9f7;color:#19756d;font-size:11px;font-weight:800;cursor:pointer;transition:.18s}
+.qr-upload:hover{background:#e0f4f0;border-color:#6bb6ac}
+.qr-upload input{display:none}
+.qr-privacy{margin:8px 0 0;color:#8b9aa5;font-size:10px}
+.qr-preview{min-height:255px;display:grid;place-items:center;border:1px dashed #cddce5;border-radius:15px;background:linear-gradient(145deg,#f8fbfc,#f2f7fa);padding:16px;text-align:center;color:#8193a0}
+.qr-placeholder-icon{width:53px;height:53px;margin:0 auto 9px;border:1px solid #d6e2e9;border-radius:15px;background:#fff;display:grid;place-items:center;color:#81a0b0;font-size:24px}
+.qr-preview p{margin:0;font-size:11px;line-height:1.6}
+.qr-preview .qr-empty-title{font-size:12px;color:#5d778b;font-weight:800;margin-bottom:3px}
+.qr-preview img{display:block;max-width:min(100%,290px);max-height:290px;object-fit:contain;border-radius:9px;background:#fff;box-shadow:0 4px 16px rgba(25,62,83,.1)}
+.qr-preview .qr-file-name{margin-top:8px;color:#718698;font-size:10px;overflow-wrap:anywhere}
+.qr-clear{margin-top:8px;border:0;background:transparent;color:#a3524c;text-decoration:underline;font-size:10px}
+.qr-live-message{min-height:16px;margin:5px 0 0;color:#a34d47;font-size:10px}
+.reference-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.reference-item{border:1px solid #e2ebf0;border-radius:12px;background:#fbfdfe;padding:12px 13px}
+.reference-item h3{margin:0 0 5px;color:#294b65;font-size:11px}
+.reference-item p{margin:0;color:#758999;font-size:10px;line-height:1.6}
+.reference-item a{color:#168477;text-decoration:none;border-bottom:1px solid rgba(22,132,119,.25)}
+.reference-item a:hover{color:#0d665f;border-bottom-color:#0d665f}
+.formula-block{margin:12px 0 0;border-radius:12px;background:#f2f7fa;border:1px solid #e2edf2;padding:12px 14px}
+.formula-block h3{margin:0 0 6px;color:#426179;font-size:11px}
+.formula{display:block;color:#173e5b;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:1.8;overflow-wrap:anywhere}
+.formula-note{margin:6px 0 0;color:#718696;font-size:10px;line-height:1.6}
+.data-quality{margin-top:15px;border:1px solid #eadbbd;border-radius:13px;background:#fffaf1;overflow:hidden}
+.data-quality summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:9px;padding:12px 14px;color:#77551c;font-size:11px;font-weight:800}
+.data-quality summary::-webkit-details-marker{display:none}
+.data-quality summary:after{content:"＋";margin-left:auto;color:#a98034;font-size:15px}
+.data-quality[open] summary:after{content:"−"}
+.quality-count{display:grid;place-items:center;width:22px;height:22px;border-radius:7px;background:#f7e8c7;color:#91691d;font-size:10px}
+.quality-body{padding:0 15px 14px;color:#7c6b4c;font-size:10px;line-height:1.7}
+.quality-body ul{margin:6px 0 0;padding-left:17px}
+.quality-body li{margin:4px 0}
+.quality-body b{color:#78541a}
+.footer{display:flex;justify-content:space-between;gap:20px;padding:17px 2px 0;color:#8a9ba7;font-size:10px}
+.footer strong{color:#627c90}
+.small-tag{display:inline-flex;align-items:center;padding:4px 8px;background:#eef4f7;color:#627e91;border-radius:999px;font-size:9px;font-weight:800}
+.hidden{display:none!important}
+.db-toolbar{display:grid;grid-template-columns:minmax(155px,.9fr) minmax(240px,1.35fr) minmax(180px,1fr) auto;gap:10px;align-items:end;margin:0 0 13px}
+.db-toolbar .field-label{margin-bottom:5px}
+.file-control{position:relative;padding:0 10px;overflow:hidden}
+.file-control input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.file-control span{color:#758a99;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none}
+.db-toolbar-secondary{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.db-summary{display:flex;align-items:center;flex-wrap:wrap;gap:9px;min-width:0}
+.db-sync-note{color:#8294a1;font-size:10px}
+.db-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.db-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;border:1px solid #d9e4eb;border-radius:9px;background:#fff;color:#527087;padding:7px 11px;font-size:10px;font-weight:800;white-space:nowrap;transition:.18s}
+.db-button:hover{border-color:#9db8c9;background:#f8fbfd;color:#203f57}
+.db-button.primary-db{border-color:#168d83;background:#168d83;color:#fff;box-shadow:0 4px 10px rgba(14,159,145,.12)}
+.db-button.primary-db:hover{background:#0e7f78}
+.db-button.danger-db{border-color:#efd0cd;background:#fff7f6;color:#a4524c}
+.db-button:disabled{opacity:.45;cursor:not-allowed}
+.maintenance-login-card{width:min(100%,500px);margin:18px auto;padding:25px 27px;border:1px solid #dce8ed;border-radius:18px;background:#fff;box-shadow:var(--shadow);text-align:center}
+.login-mark{display:grid;place-items:center;width:43px;height:43px;margin:0 auto 10px;border-radius:14px;background:#e8f7f4;color:#15877c;font-size:19px}
+.maintenance-login-card .view-kicker{font-size:8px}
+.maintenance-login-card h3{margin:4px 0;color:#1a405a;font-size:19px}
+.login-intro{margin:0 auto 17px;max-width:380px;color:#7a8c9b;font-size:10px;line-height:1.6}
+.maintenance-login-form{display:grid;gap:11px;text-align:left}
+.login-field{display:block;color:#4d687e;font-size:10px;font-weight:750}
+.login-field span{display:block;margin-bottom:5px}
+.login-field input{width:100%;height:42px;border:1px solid #dce6ed;border-radius:9px;background:#fbfdfe;color:#18364f;padding:0 11px;font:inherit;font-size:12px;outline:none}
+.login-field input:focus{border-color:#64b6ac;box-shadow:0 0 0 3px rgba(14,159,145,.1);background:#fff}
+.login-submit{width:100%;margin-top:3px}
+.login-message{min-height:17px;margin:8px 0 0;color:#a34d47;font-size:10px}
+.login-readonly-note{margin:7px 0 0;color:#8a9aa6;font-size:9px;line-height:1.5}
+.maintenance-sessionbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 12px;padding:9px 12px;border:1px solid #dce9ef;border-radius:10px;background:#f7fafb;color:#6a8192;font-size:10px}
+.maintenance-sessionbar b{color:#26766c}
+.db-note{margin:0 0 13px;padding:10px 12px;border:1px solid #dce9ef;border-radius:10px;background:#f5f9fb;color:#6d8494;font-size:10px;line-height:1.6}
+.db-note b{color:#365c73}
+.db-status-ok{background:#e7f7ef!important;color:#21725d!important}
+.db-status-error{background:#fff0ee!important;color:#a14b45!important}
+.database-table-wrap{margin-top:0}
+.database-table{min-width:1120px}
+.database-table td{font-size:10px}
+.db-name b{display:block;color:#294b63;font-size:11px}
+.db-name small{display:block;margin-top:3px;color:#8a9aa6;font-size:9px}
+.db-dose{max-width:340px;white-space:normal;overflow-wrap:anywhere}
+.db-qr-badge{display:inline-flex;align-items:center;border-radius:999px;padding:4px 7px;background:#f0f4f7;color:#7a8c99;font-size:9px;white-space:nowrap}
+.db-qr-badge.ready{background:#e9f7f3;color:#187968}
+.db-qr-filename{display:block;max-width:110px;margin-top:4px;color:#8596a2;font-size:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.database-card{margin-top:0}
+.row-actions{display:flex;gap:5px}
+.qr-inline-tools{display:grid;grid-template-columns:max-content max-content;align-items:center;gap:5px;min-width:180px}
+.qr-file-pick{min-height:27px}
+.qr-row-file-name{grid-column:1/-1;max-width:185px;color:#8a9aa6;font-size:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row-action:disabled{opacity:.45;cursor:not-allowed}
+.row-action{border:1px solid #dae5eb;border-radius:7px;background:#fff;color:#527187;padding:5px 7px;font-size:9px;font-weight:800;cursor:pointer}
+.row-action:hover{background:#f3f8fa}
+.row-action.delete{color:#a14e48;border-color:#ecd3d0}
+.modal{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:18px}
+.modal.hidden{display:none}
+.modal-backdrop{position:absolute;inset:0;background:rgba(9,29,46,.55);backdrop-filter:blur(3px)}
+.modal-panel{position:relative;z-index:1;width:min(760px,100%);max-height:min(91vh,900px);overflow:auto;border:1px solid #dce7ed;border-radius:18px;background:#fff;padding:21px;box-shadow:0 22px 70px rgba(9,31,48,.25)}
+.modal-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #eaf0f3}
+.modal-heading h2{margin:0;color:#183c57;font-size:19px}
+.modal-eyebrow{color:#4e9a92;margin-bottom:3px}
+.modal-close{width:32px;height:32px;border:1px solid #e1e8ed;border-radius:9px;background:#fff;color:#627b8e;font-size:22px;line-height:1}
+.record-form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.record-form-grid label{display:block;min-width:0;color:#526c80;font-size:10px;font-weight:700}
+.record-form-grid label.wide{grid-column:1/-1}
+.record-form-grid label span{display:block;margin-bottom:5px}
+.record-form-grid input,.record-form-grid textarea{width:100%;border:1px solid #dce6ed;border-radius:8px;background:#fbfdfe;color:#18364f;padding:9px 10px;font:inherit;font-size:11px;outline:none}
+.record-form-grid input:focus,.record-form-grid textarea:focus{border-color:#64b6ac;box-shadow:0 0 0 3px rgba(14,159,145,.1);background:#fff}
+.record-form-grid textarea{resize:vertical;line-height:1.5}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:15px;padding-top:12px;border-top:1px solid #edf1f4}
+@media(max-width:900px){.module-grid{gap:13px}.module-card{min-height:245px;padding:21px}.workspace-grid{grid-template-columns:1fr}.patient-card{order:1}.results-card{order:2}.hero-meta{gap:12px}.qr-layout{grid-template-columns:1fr 1fr}.db-toolbar{grid-template-columns:1fr 1fr}.db-toolbar-secondary{align-items:flex-start;flex-direction:column}.db-actions{justify-content:flex-start}}
+@media(max-width:640px){.shell{width:min(100% - 24px,1200px)}.dose-recommendation-head{align-items:flex-start;flex-direction:column}.module-home{padding-top:11px}.module-grid{grid-template-columns:1fr}.module-card{min-height:215px;padding:19px}.view-toolbar{align-items:flex-start;padding:13px}.view-toolbar h2{font-size:17px}.view-home-button{padding:7px 8px;font-size:9px}.section-nav{gap:2px}.section-nav a{font-size:9px;padding:4px 7px}.hero{padding-top:19px}.masthead{align-items:flex-start;gap:12px;flex-wrap:wrap}.brand{width:100%;gap:10px}.brand-icon{width:43px;height:43px;flex-basis:43px;border-radius:13px}.brand-icon svg{width:27px;height:27px}.eyebrow{font-size:8px}h1{font-size:21px}.subtitle{font-size:11px}.hero-meta{flex-direction:column;align-items:flex-end;gap:8px}.local-badge{font-size:9px;padding:6px 8px}.record-count{display:none}.nav{gap:3px}.nav button{font-size:10px;padding:7px 10px}.section-nav a{font-size:9px;padding:4px 8px}main{padding-top:14px}.safety-banner{padding:11px 12px}.safety-banner p{font-size:11px}.patient-card,.results-card,.drug-card,.qr-card,.ref-card{padding:16px}.form-grid{gap:11px 9px}.field-label{font-size:10px}.metrics-grid{gap:8px}.metric-card{padding:12px;min-height:137px}.metric-value{font-size:30px}.metric-top{font-size:8px}.metric-foot{font-size:9px}.stage-scale{gap:3px}.stage-step{font-size:8px;padding:5px 2px}.stage-step b{font-size:9px}.drug-toolbar{grid-template-columns:1fr;gap:9px}.dose-output{padding:11px}.dose-compute{grid-template-columns:1fr}.calc-box.full{grid-column:auto}.qr-layout{grid-template-columns:1fr}.qr-preview{min-height:210px}.reference-grid{grid-template-columns:1fr}.footer{flex-direction:column;gap:4px}.section-heading h2{font-size:16px}}
+@media(max-width:380px){.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.sex-options{max-width:100%}.metric-card{min-height:144px}.metric-value{font-size:27px}}
+@media(max-width:640px){.patient-actions{flex-wrap:wrap}.patient-actions-right{flex:1;justify-content:flex-end}.calc-status{margin-right:auto}.method-options{gap:5px}.method-option span{padding:7px 5px}.method-option b{font-size:10px}.method-option small{font-size:8px}}
+@media(max-width:390px){.patient-actions-right{width:100%;flex-basis:100%}.patient-actions{align-items:center}.method-options{grid-template-columns:1fr;gap:6px}.method-option span{min-height:45px;padding:7px 10px}.method-option small{font-size:9px}}
+@media(max-width:640px){.db-toolbar{grid-template-columns:1fr}.db-toolbar-secondary{gap:10px}.db-actions{width:100%;display:grid;grid-template-columns:repeat(2,max-content)}.record-form-grid{grid-template-columns:1fr 1fr}.modal-panel{padding:15px}.db-sync-note{font-size:9px}}
+@media(max-width:390px){.record-form-grid{grid-template-columns:1fr}.record-form-grid label.wide{grid-column:auto}.db-actions{grid-template-columns:1fr 1fr}.modal{padding:8px}.modal-panel{max-height:96vh}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="shell">
+    <div class="masthead">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none"><path d="M17.2 7.5c-5.1 0-9.1 5.1-9.1 11.8 0 7.4 4.5 13 10.2 13 3.1 0 5.1-2.1 5.1-5.5V14.6c0-4.1-2.3-7.1-6.2-7.1Z" stroke="#a9eee0" stroke-width="2.2"/><path d="M30.8 7.5c5.1 0 9.1 5.1 9.1 11.8 0 7.4-4.5 13-10.2 13-3.1 0-5.1-2.1-5.1-5.5V14.6c0-4.1 2.3-7.1 6.2-7.1Z" stroke="#a9eee0" stroke-width="2.2"/><path d="M23.4 24.8c-1.9 2.2-3.2 4.1-3.2 7.1v6.3M24.6 24.8c1.9 2.2 3.2 4.1 3.2 7.1v6.3" stroke="#a9eee0" stroke-width="2.2" stroke-linecap="round"/><path d="M20.2 38.2h-3.7m14.9 0h-3.7" stroke="#75d6c3" stroke-width="2.2" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <p class="eyebrow">RENAL FUNCTION · DOSE REFERENCE</p>
+          <h1>肾功能与抗肿瘤剂量计算辅助平台</h1>
+          <p class="subtitle">肾功能估算 · 抗肿瘤剂量匹配 · 药品数据库维护</p>
+        </div>
+      </div>
+      <div class="hero-meta">
+        <div class="local-badge"><span class="local-dot"></span>本地运行 · 不上传患者数据</div>
+        <div class="record-count"><b id="recordCount">59</b><span>剂量资料行</span></div>
+      </div>
+    </div>
+    <nav class="nav" aria-label="主模块导航">
+      <button class="nav-view active" type="button" data-view="home">功能首页</button>
+      <button class="nav-view" type="button" data-view="calculator">肾功能与剂量辅助台</button>
+      <button class="nav-view" type="button" data-view="database">数据库维护</button>
+    </nav>
+    <nav class="section-nav hidden" id="calcSubnav" aria-label="辅助台页面导航">
+      <a href="#workspace">计算工作台</a><a href="#medications">剂量匹配</a><a href="#qr">说明书二维码</a><a href="#references">公式与参考</a>
+    </nav>
+  </div>
+</header>
+<main class="shell">
+  <section id="homeView" class="module-home" aria-label="功能模块选择">
+    <div class="module-home-head"><span class="home-kicker">RENAL DOSE WORKSPACE</span><h2>请选择功能模块</h2><p>计算辅助与药品数据库维护分开管理；数据库保存的数据会同步供计算与剂量匹配界面调用。</p></div>
+    <div class="module-grid">
+      <button class="module-card calculator-module" type="button" data-view="calculator">
+        <span class="module-icon" aria-hidden="true">＋</span><span class="module-card-title">肾功能与剂量辅助台</span><span class="module-card-copy">录入患者与检验数据，计算肾功能、查看分级，并按药品数据库中的规则匹配剂量。</span><span class="module-card-cta">进入计算与推荐界面 <b>→</b></span>
+      </button>
+      <button class="module-card database-module" type="button" data-view="database">
+        <span class="module-icon" aria-hidden="true">▤</span><span class="module-card-title">数据库维护</span><span class="module-card-copy">导入 Excel / CSV，新增、修改或删除剂量规则，并为每种药品上传和保存说明书二维码。</span><span class="module-card-cta">进入数据库维护界面 <b>→</b></span>
+      </button>
+    </div>
+    <div class="module-sync-note"><span class="module-sync-dot"></span><div><b>同一份药品数据库</b><span>在数据库维护中保存后，计算与推荐界面会重新载入最新规则及二维码关联。</span></div></div>
+  </section>
+  <div id="calculatorView" class="app-view hidden" aria-label="肾功能与剂量辅助台">
+    <div class="view-toolbar"><div><span class="view-kicker">CALCULATION & DOSE MATCHING</span><h2>肾功能与剂量辅助台</h2><p>患者数据仅用于本次浏览器端计算；药品规则从数据库维护模块读取。</p></div><button class="view-home-button" type="button" data-view="home">返回功能首页</button></div>
+  <div class="safety-banner" role="note">
+    <svg class="alert-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3.5 21 20H3l9-16.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 9v5.2m0 2.6v.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <div><strong>临床决策辅助，不是处方或用药指令</strong><p>剂量资料来自上传 CSV，尚未核验说明书版本。血肌酐可估算 CrCl；CysC 单项或联合公式计算的是 eGFR。若用 eGFR 去标化绝对值对照 CSV 的 CrCl 区间，会明确标注为<b>非等价代理值</b>，须由医生/药师复核。急性肾损伤、肌酐非稳态、透析、儿童、极端体型或肿瘤方案用药需特别谨慎。</p></div>
+  </div>
+
+  <section id="workspace" class="workspace-grid" aria-label="患者数据与肾功能计算">
+    <article class="section-card patient-card">
+      <div class="section-heading"><div class="section-number">01</div><div><h2>患者与检验数据</h2><p>填写资料后点击“计算结果”，再查看肾功能与剂量匹配</p></div></div>
+      <div class="form-grid">
+        <label class="field full"><span class="field-label">选择药品 <small>从数据库下拉选择</small></span><span class="control select-wrap"><select id="drugSelect" aria-label="选择药品"></select></span><span class="input-help">药品剂量规则来自“数据库维护”；选择药品后，计算结果区会显示对应的匹配资料。</span></label>
+        <label class="field"><span class="field-label">年龄 <small>成人公式</small></span><span class="control"><input id="age" type="number" min="18" max="120" step="1" inputmode="numeric" placeholder="例如 65" aria-label="年龄（岁）"><span class="suffix">岁</span></span></label>
+        <div class="field"><span class="field-label">公式性别系数</span><div class="sex-options"><label class="sex-option"><input type="radio" name="sex" value="male" checked><span>男性</span></label><label class="sex-option"><input type="radio" name="sex" value="female"><span>女性</span></label></div></div>
+        <div class="field full"><span class="field-label">肾功能估算方式 <small>选择本次区间匹配值的来源</small></span><div class="method-options" role="radiogroup" aria-label="肾功能估算方式"><label class="method-option"><input type="radio" name="renalMode" value="creatinine" checked><span><b>血肌酐</b><small>Cockcroft–Gault CrCl</small></span></label><label class="method-option"><input type="radio" name="renalMode" value="cystatin"><span><b>胱抑素 C</b><small>CKD-EPI 2012 eGFRcys</small></span></label><label class="method-option"><input type="radio" name="renalMode" value="combined"><span><b>两者联合</b><small>CKD-EPI 2021 eGFRcr-cys</small></span></label></div><span class="input-help" id="modeHint">血肌酐模式计算 Cockcroft–Gault CrCl；胱抑素 C 或联合模式计算的是 eGFR，去标化后仅作为 CSV CrCl 区间的代理值。</span></div>
+        <label class="field"><span class="field-label">身高</span><span class="control"><input id="height" type="number" min="50" max="250" step="0.1" inputmode="decimal" placeholder="例如 170" aria-label="身高（厘米）"><span class="suffix">cm</span></span></label>
+        <label class="field"><span class="field-label">实际体重</span><span class="control"><input id="weight" type="number" min="2" max="350" step="0.1" inputmode="decimal" placeholder="例如 65" aria-label="实际体重（千克）"><span class="suffix">kg</span></span></label>
+        <label class="field full"><span class="field-label">Cockcroft–Gault 计算体重 <small>仅血肌酐模式需要</small></span><span class="control"><input id="cgWeight" type="number" min="2" max="350" step="0.1" inputmode="decimal" placeholder="默认跟随实际体重" aria-label="Cockcroft-Gault计算体重（千克）"><span class="suffix">kg</span></span><span class="weight-sync"><input id="syncWeight" type="checkbox" checked> 与实际体重联动（肥胖/水肿/消瘦等情况请按临床方案选择计算体重）</span></label>
+        <label class="field full"><span class="field-label">血肌酐 SCr</span><span class="inline-control"><span class="control"><input id="scr" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="例如 1.0" aria-label="血肌酐"></span><span class="control unit-control"><select id="scrUnit" aria-label="血肌酐单位"><option value="mg/dL">mg/dL</option><option value="umol/L">µmol/L</option></select></span></span><span class="input-help">可用于 Cockcroft–Gault、CKD-EPI 2021 肌酐单项，或联合公式。</span></label>
+        <label class="field full"><span class="field-label">胱抑素 C CysC</span><span class="inline-control"><span class="control"><input id="cys" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="例如 1.0" aria-label="胱抑素C"></span><span class="control unit-control"><select id="cysUnit" aria-label="胱抑素C单位"><option value="mg/L">mg/L</option><option value="mg/dL">mg/dL</option></select></span></span><span class="input-help">可用于 CKD-EPI 2012 胱抑素 C 单项或 CKD-EPI 2021 联合公式；mg/dL 输入会换算为 mg/L。</span></label>
+      </div>
+      <div class="patient-actions"><button class="ghost-button" id="clearInputs" type="button">清空患者数据</button><div class="patient-actions-right"><span class="calc-status" id="calcStatus">填好资料后点击计算</span><button class="calc-button" id="calculateButton" type="button"><span aria-hidden="true">↗</span>计算结果</button></div></div>
+    </article>
+
+    <article class="section-card results-card">
+      <div class="section-heading"><div class="section-number">02</div><div><h2>计算结果</h2><p>按选择方式计算区间匹配值，并以对应 eGFR 显示 KDIGO G 分级</p></div><span class="heading-actions small-tag">成人估算</span></div>
+      <div class="metrics-grid">
+        <div class="metric-card primary">
+          <div class="metric-top"><span id="matchTitle">剂量区间匹配值</span><span class="metric-icon">↘</span></div>
+          <div class="metric-value-row"><strong class="metric-value" id="matchValue">—</strong><span class="metric-unit">mL/min</span></div>
+          <div class="metric-foot" id="matchMethod">完成资料并点击计算</div>
+        </div>
+        <div class="metric-card stage-metric">
+          <div class="metric-top"><span id="stageMethod">KDIGO G 分级用 eGFR</span><span class="metric-icon" style="background:#edf3f8;color:#4c7792">G</span></div>
+          <div class="metric-value-row"><strong class="metric-value" id="egfrValue">—</strong><span class="metric-unit">mL/min/1.73m²</span></div>
+          <span class="stage-chip" id="stageChip">待计算</span>
+        </div>
+        <div class="bsa-title">体表面积 BSA</div>
+        <div class="bsa-card"><div class="bsa-label"><span>Mosteller</span><span class="bsa-symbol">M</span></div><strong id="mostellerValue">— <small>m²</small></strong></div>
+        <div class="bsa-card"><div class="bsa-label"><span>Du Bois</span><span class="bsa-symbol">D</span></div><strong id="duboisValue">— <small>m²</small></strong></div>
+      </div>
+      <div class="stage-scale" aria-label="KDIGO eGFR 分级">
+        <div class="stage-step" data-stage="G1"><b>G1</b>≥90</div><div class="stage-step" data-stage="G2"><b>G2</b>60–89</div><div class="stage-step" data-stage="G3a"><b>G3a</b>45–59</div><div class="stage-step" data-stage="G3b"><b>G3b</b>30–44</div><div class="stage-step" data-stage="G4"><b>G4</b>15–29</div><div class="stage-step" data-stage="G5"><b>G5</b>&lt;15</div>
+      </div>
+      <div class="calc-note" id="methodNotice"></div><div class="validation-note" id="validationMessage" aria-live="polite"></div>
+      <div class="disclaimer-mini">KDIGO G 分类按选定公式的标准化 eGFR（mL/min/1.73m²）显示，不使用去标化数值分级。G1/G2 单凭 eGFR 数值不足以诊断 CKD；慢性肾病判断还需结合肾损伤证据及持续时间（通常 ≥3 个月）。</div>
+      <div id="medications" class="dose-recommendation">
+        <div class="dose-recommendation-head"><div><h3>药品剂量匹配与推荐</h3><p>基于已选择的肾功能估算方式与当前药品规则；非等价代理值和源数据冲突会明确提示。</p></div><span class="count-pill"><i></i><span id="catalogCount">载入 43 个药品条目 · 59 条原始剂量资料</span></span></div>
+        <div class="dose-output" id="doseOutput" aria-live="polite"><div class="empty-state"><span class="empty-icon">Rx</span><span>请填写患者资料、选择肾功能估算方式并点击“计算结果”。匹配不到的区间不会自动推测或补写剂量。</span></div></div>
+        <div id="sourceTable"></div>
+      </div>
+    </article>
+  </section>
+
+  <section id="qr" class="section-card full-section qr-card">
+    <div class="section-heading"><div class="section-number">05</div><div><h2>说明书二维码</h2><p>仅显示数据库中已保存的图片，并标注当前选择药品</p></div></div>
+    <div class="qr-readonly-note"><b>图片来源：</b>数据库维护模块中与当前药品关联的说明书二维码；此处仅查看，不上传、不编辑、不生成二维码。</div>
+    <div class="qr-display-shell"><div class="qr-preview" id="qrPreview"><div><div class="qr-placeholder-icon">▦</div><p class="qr-empty-title">暂无数据库二维码图片</p><p>请先在“数据库维护”中为当前药品上传并保存说明书二维码。</p></div></div></div>
+  </section>
+
+  <section id="references" class="section-card full-section ref-card">
+    <div class="section-heading"><div class="section-number">06</div><div><h2>计算公式与参考文献</h2><p>公式来源与上传剂量数据的使用边界</p></div></div>
+    <div class="formula-block"><h3>1 · 肌酐清除率估算（Cockcroft–Gault，CrCl；mL/min）</h3><code class="formula">CrCl = [(140 − 年龄) × CG 计算体重(kg)] ÷ [72 × SCr(mg/dL)] × 0.85（女性；男性 × 1）</code><p class="formula-note">SCr 若为 µmol/L，先除以 88.4 换算为 mg/dL。此公式不使用胱抑素 C；CrCl 仅作估算，依赖肌酐稳态及合适的计算体重。不同药品标签/方案可能规定不同的体重取值。</p></div>
+    <div class="formula-block"><h3>2 · 血肌酐单项 eGFR（CKD-EPI 2021；mL/min/1.73m²）</h3><code class="formula">eGFRcr = 142 × min(SCr/κ,1)^α × max(SCr/κ,1)^−1.200 × 0.9938^年龄 × (女性 × 1.012)</code><p class="formula-note">SCr 单位 mg/dL；κ：女性 0.7、男性 0.9；α：女性 −0.241、男性 −0.302。此 eGFR 用于 KDIGO G 分类；它不是 Cockcroft–Gault CrCl。</p></div>
+    <div class="formula-block"><h3>3 · 胱抑素 C 单项 eGFR（CKD-EPI 2012；mL/min/1.73m²）</h3><code class="formula">eGFRcys = 133 × min(CysC/0.8,1)^−0.499 × max(CysC/0.8,1)^−1.328 × 0.996^年龄 × (女性 × 0.932)</code><p class="formula-note">CysC 单位 mg/L；需使用标准化检测。公式输出标准化 eGFR，并非肌酐清除率。</p></div>
+    <div class="formula-block"><h3>4 · 肌酐 + 胱抑素 C 联合 eGFR（CKD-EPI 2021；mL/min/1.73m²）</h3><code class="formula">eGFRcr-cys = 135 × min(SCr/κ,1)^α × max(SCr/κ,1)^−0.544 × min(CysC/0.8,1)^−0.323 × max(CysC/0.8,1)^−0.778 × 0.9961^年龄 × (女性 × 0.963)</code><p class="formula-note">SCr 单位 mg/dL；CysC 单位 mg/L。κ：女性 0.7、男性 0.9；α：女性 −0.219、男性 −0.144。KDIGO G 分类使用标准化 eGFR（未去标化）。</p></div>
+    <div class="formula-block"><h3>5 · eGFR 去标化（仅作为 CSV CrCl 区间的代理比较）</h3><code class="formula">绝对 eGFR (mL/min) = eGFR (mL/min/1.73m²) × Mosteller BSA (m²) ÷ 1.73</code><p class="formula-note">胱抑素 C 单项/联合模式用该绝对 eGFR 尝试对照 CSV CrCl 范围，但它不等于 Cockcroft–Gault CrCl；页面会在剂量匹配处持续标示此限制，结果仅供核对。机构、药品说明书或临床方案规定其他方法时，应以其要求为准。</p></div>
+    <div class="formula-block"><h3>6 · 体表面积（BSA）</h3><code class="formula">Mosteller：BSA(m²) = √[身高(cm) × 体重(kg) ÷ 3600]</code><code class="formula">Du Bois：BSA(m²) = 0.007184 × 身高(cm)^0.725 × 体重(kg)^0.425</code><p class="formula-note">页面会同时显示两种估算值。mg/m² 的结构化剂量分别按两种 BSA 换算；eGFR 去标化固定使用 Mosteller BSA。最终方法与剂量取整应遵循具体方案/机构规范。</p></div>
+    <div class="formula-block"><h3>剂量换算规则</h3><p class="formula-note">仅使用 CSV 的 <b>ccr_min / ccr_max</b> 区间和结构化剂量单位。血肌酐模式用 CrCl 直接匹配；CysC/联合模式按去标化绝对 eGFR 作为非等价代理值匹配。mg/m² × BSA；mg/kg × 实际体重；mg 固定值原样显示；mg/d 标为日剂量而非单次剂量。源数据存在单位/数值矛盾、无剂量值、混合单位、仅有文字建议或当前值无匹配区间时，不补写/外推剂量。</p></div>
+    <div class="reference-grid" style="margin-top:13px">
+      <article class="reference-item"><h3>CrCl · Cockcroft & Gault, 1976</h3><p>Cockcroft DW, Gault MH. Prediction of creatinine clearance from serum creatinine. <i>Nephron.</i> 1976;16(1):31–41. <a href="https://pubmed.ncbi.nlm.nih.gov/1244564/" target="_blank" rel="noopener">PubMed 1244564</a></p></article>
+      <article class="reference-item"><h3>eGFR · CKD-EPI 2021 equations</h3><p>2021 race-free creatinine and creatinine–cystatin C equations. <a href="https://doi.org/10.1056/NEJMoa2102953" target="_blank" rel="noopener">Inker et al., NEJM 2021 · doi:10.1056/NEJMoa2102953</a> · <a href="https://www.niddk.nih.gov/research-funding/research-programs/kidney-clinical-research-epidemiology/laboratory/glomerular-filtration-rate-equations/adults" target="_blank" rel="noopener">NIDDK 公式说明（含 2021 肌酐单项/联合公式）</a></p></article>
+      <article class="reference-item"><h3>CysC 单项 eGFR · CKD-EPI 2012</h3><p>Inker LA, Schmid CH, Tighiouart H, et al. Estimating Glomerular Filtration Rate from Serum Creatinine and Cystatin C. <i>N Engl J Med.</i> 2012;367(1):20–29. <a href="https://doi.org/10.1056/NEJMoa1114248" target="_blank" rel="noopener">doi:10.1056/NEJMoa1114248</a> · <a href="https://www.niddk.nih.gov/research-funding/research-programs/kidney-clinical-research-epidemiology/laboratory/glomerular-filtration-rate-equations/adults" target="_blank" rel="noopener">NIDDK 公式说明</a></p></article>
+      <article class="reference-item"><h3>KDIGO · 2024 CKD 指南</h3><p>KDIGO CKD Work Group. KDIGO 2024 Clinical Practice Guideline for the Evaluation and Management of Chronic Kidney Disease. <i>Kidney Int.</i> 2024;105(Suppl 4S):S117–S314. <a href="https://kdigo.org/wp-content/uploads/2024/03/KDIGO-2024-CKD-Guideline.pdf" target="_blank" rel="noopener">指南 PDF</a></p></article>
+      <article class="reference-item"><h3>BSA · Mosteller, 1987</h3><p>Mosteller RD. Simplified calculation of body-surface area. <i>N Engl J Med.</i> 1987;317(17):1098. <a href="https://doi.org/10.1056/NEJM198710223171717" target="_blank" rel="noopener">doi:10.1056/NEJM198710223171717</a></p></article>
+      <article class="reference-item"><h3>BSA · Du Bois & Du Bois, 1916</h3><p>Du Bois D, Du Bois EF. A formula to estimate the approximate surface area if height and weight be known. <i>Arch Intern Med.</i> 1916;17(6):863–871. <a href="https://doi.org/10.1001/archinte.1916.00080130010002" target="_blank" rel="noopener">doi:10.1001/archinte.1916.00080130010002</a></p></article>
+      <article class="reference-item"><h3>药品剂量来源 · 用户上传 CSV</h3><p>文件：<b>with code all data.csv</b>。原始 reference 字段多标注为“药品说明书”，但未提供说明书版本、批准日期、具体页码或二维码链接；本页面不对其准确性/时效性背书。</p></article>
+    </div>
+    <details class="data-quality">
+      <summary><span class="quality-count">!</span><span>源数据核对提示 · 自动换算已对矛盾项目设限</span></summary>
+      <div class="quality-body"><ul>
+        <li><b>恩美曲妥珠单抗：</b>dose_value 为 4 mg/kg，但 dose_description 写 3.6 mg/kg；匹配到相关行时不自动换算。</li>
+        <li><b>依沃西单抗：</b>结构化 dose_unit 为 mg/kg，文字剂量却写 20 mg/m²；单位冲突，停用自动换算。</li>
+        <li><b>雷替曲塞：</b>CrCl 55–65 行 dose_value=2 与文字 2.25 mg/m² 不一致；CrCl 25–54 行 dose_value=2 与文字 1.50 mg/m² 不一致；这两行不自动换算。</li>
+        <li><b>曲妥珠单抗：</b>dose_value=4 mg/kg 与 dose_description=400 mg/kg 不一致；该药也未提供 CrCl 分层，不生成个体剂量。</li>
+        <li><b>甲氨蝶呤：</b>同一 dose_unit 混有 mg 与 mg/m²，文字又区分成人/儿童方案；不自动换算。</li>
+        <li><b>帕妥珠单抗：</b>原文同时写起始 840 mg 与后续每三周 420 mg；不同治疗阶段不可混作同一剂量，需核对方案。</li>
+        <li><b>区间边界：</b>匹配按 CSV 数字区间端点包含（闭区间）处理；个别原文使用“&gt;60”等表述，或区间在 60 处重叠。请打开原文核对边界语义。</li>
+      </ul></div>
+    </details>
+  </section>
+  <footer class="footer"><span><strong>肾功能与剂量辅助台</strong> · 患者检验输入仅在浏览器内存计算；数据库规则写入 Supabase；二维码图片保存在 Supabase Storage</span><span>剂量数据来自上传 CSV · 请以现行说明书与医疗团队审核为准</span></footer>
+  </div>
+  <section id="databaseView" class="app-view hidden" aria-label="药品数据库维护">
+    <div class="view-toolbar"><div><span class="view-kicker">DRUG DATABASE MANAGEMENT</span><h2>数据库维护</h2><p>维护结果保存在同一药品数据库，并供肾功能与剂量辅助台调用。</p></div><button class="view-home-button" type="button" data-view="home">返回功能首页</button></div>
+    <section id="maintenanceLoginPanel" class="maintenance-login-card" aria-labelledby="loginTitle">
+      <div class="login-mark" aria-hidden="true">◆</div><span class="view-kicker">AUTHORIZED ACCESS</span><h3 id="loginTitle">登录数据库维护</h3>
+      <p class="login-intro">请输入维护账号和密码。规则与二维码的新增、修改、导入和删除操作需要登录。</p>
+      <form id="maintenanceLoginForm" class="maintenance-login-form">
+        <label class="login-field"><span>用户名</span><input id="dbUsername" name="username" type="text" value="admin" autocomplete="username" required></label>
+        <label class="login-field"><span>密码</span><input id="dbPassword" name="password" type="password" autocomplete="current-password" required></label>
+        <button class="db-button primary-db login-submit" id="dbLoginButton" type="submit">登录维护</button>
+      </form>
+      <p class="login-message" id="dbLoginMessage" aria-live="polite"></p>
+      <p class="login-readonly-note">计算界面仍可读取规则与二维码；维护写入仅对登录账号开放。</p>
+    </section>
+    <div id="dbAdminContent" class="hidden">
+      <div class="maintenance-sessionbar"><span id="maintenanceSessionMessage">已登录维护账号：admin</span><button class="db-button" id="dbLogoutButton" type="button">退出登录</button></div>
+    <section id="database" class="section-card full-section database-card">
+      <div class="section-heading"><div class="section-number">04</div><div><h2>药品数据库维护</h2><p>导入与维护剂量规则，并为每种药品上传说明书二维码；保存后辅助台自动调用</p></div><span class="heading-actions small-tag" id="dbStatus">正在连接数据库…</span></div>
+      <div class="db-toolbar">
+        <label class="field"><span class="field-label">筛选药品 / 剂量</span><span class="control"><input id="dbSearch" type="search" placeholder="搜索名称、分层、剂量" aria-label="筛选药品数据库"></span></label>
+        <label class="field import-mode"><span class="field-label">导入方式</span><span class="control"><select id="importMode"><option value="merge">合并：按药物与 CrCl 区间更新/新增</option><option value="replace">替换：以文件记录覆盖药品库</option></select></span></label>
+        <label class="field file-field"><span class="field-label">选择 Excel / CSV</span><span class="control file-control"><input id="importFile" type="file" accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"><span id="importFileName">尚未选择文件</span></span></label>
+        <button class="db-button primary-db" id="importButton" type="button">导入数据</button>
+      </div>
+      <div class="db-toolbar-secondary">
+        <div class="db-summary"><span class="count-pill"><i></i><span id="dbCount">读取中…</span></span><span class="db-sync-note" id="dbSyncNote">连接后可新增、编辑、删除并持久保存。</span></div>
+        <div class="db-actions"><button class="db-button primary-db" id="addRecord" type="button">＋ 新增剂量规则</button><button class="db-button" id="exportCsv" type="button">导出 CSV</button><button class="db-button" id="exportJson" type="button">备份 JSON</button></div>
+      </div>
+      <div class="db-note"><b>数据同步：</b>剂量规则与二维码关联保存在同一数据库，计算页从这里读取；保存或导入后，数据库表和辅助台匹配结果同步刷新。二维码图像保存在 Supabase Storage；完整备份请同时保存 JSON 与 Storage 图片。</div>
+      <div class="source-table-wrap database-table-wrap"><div class="table-caption"><span>可维护的药品剂量记录</span><small>二维码按药物关联；同一药物有多个剂量分层时可在任一行上传</small></div><div class="table-scroll"><table class="database-table"><thead><tr><th>药品</th><th>肾功能分层</th><th>CrCl 区间</th><th>剂量 / 上传描述</th><th>二维码状态</th><th>上传说明书二维码</th><th>维护</th></tr></thead><tbody id="databaseRows"><tr><td colspan="7">正在载入数据库…</td></tr></tbody></table></div></div>
+    </section>
+
+    <div class="modal hidden" id="recordModal" role="dialog" aria-modal="true" aria-labelledby="recordModalTitle">
+      <div class="modal-backdrop" data-close-modal="1"></div>
+      <div class="modal-panel"><div class="modal-heading"><div><p class="eyebrow modal-eyebrow">DATABASE RECORD</p><h2 id="recordModalTitle">编辑剂量规则</h2></div><button class="modal-close" id="closeRecordModal" type="button" aria-label="关闭">×</button></div>
+        <form id="recordForm"><input id="f-id" type="hidden"><div class="record-form-grid">
+          <label><span>药物英文名 / drug_id *</span><input id="f-drug_id" required></label><label><span>药物中文名 *</span><input id="f-drug_name" required></label><label><span>肾功能分级</span><input id="f-renal_function_level"></label>
+          <label><span>CrCl 下限</span><input id="f-ccr_min" inputmode="decimal"></label><label><span>CrCl 上限</span><input id="f-ccr_max" inputmode="decimal"></label><label><span>剂量单位</span><input id="f-dose_unit" placeholder="如 mg/m²、mg/kg"></label>
+          <label><span>单次推荐剂量</span><input id="f-dose_value"></label><label><span>总剂量</span><input id="f-dose_total_value"></label><label><span>来源 / reference</span><input id="f-reference"></label>
+          <label class="wide"><span>推荐剂量描述</span><textarea id="f-dose_description" rows="2"></textarea></label><label class="wide"><span>具体意见 / adjustment_rule</span><textarea id="f-adjustment_rule" rows="2"></textarea></label><label class="wide"><span>特别提示</span><textarea id="f-special_notes" rows="2"></textarea></label>
+        </div><div class="modal-actions"><button class="db-button" id="cancelRecord" type="button">取消</button><button class="db-button primary-db" type="submit">保存规则</button></div></form>
+      </div>
+    </div>
+    </div>
+  </section>
+</main>
+<script>
+let DATA_ROWS = [{"drug_id":"cisplatin","drug_name":"顺铂","renal_function_level":"肾功能正常","ccr_min":"60","ccr_max":"999","dose_unit":"mg/m²","dose_value":"75","dose_total_value":"","dose_description":"75 mg/m²","adjustment_rule":"肌酐清除率>60ml/min，建议以75mg/m²给药","special_notes":"无","reference":"药品说明书"},{"drug_id":"cisplatin","drug_name":"顺铂","renal_function_level":"轻度肾功能不全","ccr_min":"40","ccr_max":"59","dose_unit":"mg/m²","dose_value":"60","dose_total_value":"","dose_description":"60 mg/m²","adjustment_rule":"肌酐清除率40-59ml/min，建议初始剂量减少25%","special_notes":"无","reference":"药品说明书"},{"drug_id":"cisplatin","drug_name":"顺铂","renal_function_level":"中度肾功能不全","ccr_min":"20","ccr_max":"39","dose_unit":"mg/m²","dose_value":"50","dose_total_value":"","dose_description":"50 mg/m²","adjustment_rule":"肌酐清除率20-39ml/min，建议剂量减少50%","special_notes":"无","reference":"药品说明书"},{"drug_id":"cisplatin","drug_name":"顺铂","renal_function_level":"重度肾功能不全","ccr_min":"15","ccr_max":"19","dose_unit":"mg/m²","dose_value":"30","dose_total_value":"","dose_description":"30 mg/m²","adjustment_rule":"肌酐清除率15-19ml/min，建议剂量减少70%","special_notes":"密切监测肾功能","reference":"药品说明书"},{"drug_id":"cisplatin","drug_name":"顺铂","renal_function_level":"肾衰竭","ccr_min":"0","ccr_max":"14","dose_unit":"string","dose_value":"","dose_total_value":"","dose_description":"避免使用","adjustment_rule":"肌酐清除率≤14ml/min，禁忌使用","special_notes":"肾功能衰竭患者禁用","reference":"药品说明书"},{"drug_id":"oxaliplatin","drug_name":"奥沙利铂","renal_function_level":"肾功能正常","ccr_min":"60","ccr_max":"999","dose_unit":"mg/m²","dose_value":"75","dose_total_value":"","dose_description":"75 mg/m²","adjustment_rule":"肾功能正常患者，建议以75mg/m²给药","special_notes":"无","reference":"药品说明书"},{"drug_id":"erlotinib","drug_name":"厄洛替尼","renal_function_level":"肾功能正常","ccr_min":"60","ccr_max":"999","dose_unit":"mg/d","dose_value":"150","dose_total_value":"","dose_description":"150 mg/d","adjustment_rule":"肾功能正常患者，建议150mg/日","special_notes":"无","reference":"药品说明书"},{"drug_id":"gefitinib","drug_name":"吉非替尼","renal_function_level":"肾功能正常","ccr_min":"60","ccr_max":"999","dose_unit":"mg/d","dose_value":"250","dose_total_value":"","dose_description":"250 mg/d","adjustment_rule":"肾功能正常患者，建议250mg/日","special_notes":"无","reference":"药品说明书"},{"drug_id":"fosaprepitant dimeglumine","drug_name":"福沙匹坦双葡甲胺","renal_function_level":"肾功能正常","ccr_min":"60","ccr_max":"999","dose_unit":"","dose_value":"","dose_total_value":"","dose_description":"","adjustment_rule":"","special_notes":"无","reference":"药品说明书"},{"drug_id":"Arsenious Acid and Sodium Chloride","drug_name":"亚砷酸氯化钠","renal_function_level":"肾功能正常","ccr_min":"60","ccr_max":"999","dose_unit":"mg/m²","dose_value":"7","dose_total_value":"","dose_description":"7mg/m²","adjustment_rule":"肾功能正常患者，建议7mg/m²","special_notes":"无","reference":"药品说明书"},{"drug_id":"Draatumumba","drug_name":"达雷妥尤单抗","renal_function_level":"肾功能正常","ccr_min":"60","ccr_max":"999","dose_unit":"mg/kg","dose_value":"16","dose_total_value":"","dose_description":"16mg/kg","adjustment_rule":"肾功能正常患者，建议16mg/kg给药","special_notes":"无","reference":"药品说明书"},{"drug_id":"nedaplatin","drug_name":"奈达铂","renal_function_level":"肾功能正常","ccr_min":"60","ccr_max":"999","dose_unit":"mg/m²","dose_value":"80-100","dose_total_value":"","dose_description":"80-100mg/m²","adjustment_rule":"肾功能正常患者，建议80-100mg/m²给药","special_notes":"严重肾功能不全者禁用","reference":"药品说明书"},{"drug_id":"calcium folinate","drug_name":"亚叶酸钙","renal_function_level":"肾功能正常","ccr_min":"60","ccr_max":"999","dose_unit":"mg/m²","dose_value":"9-15","dose_total_value":"","dose_description":"9-15mg/m²","adjustment_rule":"肾功能正常患者，建议9-15mg/m²给药","special_notes":"无","reference":"药品说明书"},{"drug_id":"irinotecan hydrochloride","drug_name":"盐酸伊立替康（瑞之伊）","renal_function_level":"肾功能正常","ccr_min":"60","ccr_max":"999","dose_unit":"mg/m²","dose_value":"125","dose_total_value":"","dose_description":"125mg/m²","adjustment_rule":"肾功能正常患者，建议125mg/m²给药","special_notes":"密切监测肾功能","reference":"药品说明书"},{"drug_id":"fluorouracil","drug_name":"氟尿嘧啶","renal_function_level":"","ccr_min":"","ccr_max":"","dose_unit":"mg/m²","dose_value":"300-500","dose_total_value":"","dose_description":"300-500mg/m²","adjustment_rule":"","special_notes":"","reference":"药品说明书"},{"drug_id":"raltitrexed","drug_name":"雷替曲塞","renal_function_level":"肾功能正常","ccr_min":"66","ccr_max":"999","dose_unit":"mg/m²","dose_value":"3","dose_total_value":"","dose_description":"3mg/m²","adjustment_rule":"肌酐清除率>65ml/min，建议以3mg/m²给药","special_notes":"无","reference":"药品说明书"},{"drug_id":"raltitrexed","drug_name":"雷替曲塞","renal_function_level":"","ccr_min":"55","ccr_max":"65","dose_unit":"mg/m²","dose_value":"2","dose_total_value":"","dose_description":"2.25mg/m²","adjustment_rule":"肌酐清除率55-65ml/min，建议初始剂量减少25%","special_notes":"无","reference":"药品说明书"},{"drug_id":"raltitrexed","drug_name":"雷替曲塞","renal_function_level":"","ccr_min":"25","ccr_max":"54","dose_unit":"mg/m²","dose_value":"2","dose_total_value":"","dose_description":"1.50mg/m²","adjustment_rule":"肌酐清除率25-54ml/min，建议初始剂量减少50%","special_notes":"密切监测肾功能","reference":"药品说明书"},{"drug_id":"raltitrexed","drug_name":"雷替曲塞","renal_function_level":"","ccr_min":"0","ccr_max":"24","dose_unit":"mg/m²","dose_value":"","dose_total_value":"","dose_description":"避免使用","adjustment_rule":"肌酐清除率≤25ml/min，禁忌使用","special_notes":"严重肾功能不全者禁用","reference":"药品说明书"},{"drug_id":"lobaplatin","drug_name":"洛铂","renal_function_level":"肾功能正常","ccr_min":"60","ccr_max":"999","dose_unit":"mg/m²","dose_value":"50","dose_total_value":"","dose_description":"50 mg/m²","adjustment_rule":"肾功能正常患者，建议50mg/m²给药","special_notes":"有肾功能损害患者禁用","reference":"药品说明书"},{"drug_id":"utidelone","drug_name":"代替德隆","renal_function_level":"肾功能正常","ccr_min":"60","ccr_max":"999","dose_unit":"mg/m²","dose_value":"30","dose_total_value":"","dose_description":"30mg/m²","adjustment_rule":"肾功能正常患者，建议以30mg/m²给药","special_notes":"无","reference":"药品说明书"},{"drug_id":"decitabine","drug_name":"地西他滨","renal_function_level":"肾功能正常","ccr_min":"60","ccr_max":"999","dose_unit":"mg/m²","dose_value":"15","dose_total_value":"","dose_description":"15mg/m²","adjustment_rule":"肾功能正常患者，建议15mg/m²给药","special_notes":"重度肾功能损害者（CrCl＜30ml/min），需密切监测肾功能","reference":"药品说明书"},{"drug_id":"gemcitabine","drug_name":"吉西他滨（健择）","renal_function_level":"肾功能正常","ccr_min":"60","ccr_max":"999","dose_unit":"mg/m²","dose_value":"1000","dose_total_value":"","dose_description":"1000mg/m²","adjustment_rule":"肾功能正常患者，建议1000mg/m²给药","special_notes":"肾功能损伤患者慎用","reference":"药品说明书"},{"drug_id":"doxorubicin liposome","drug_name":"多柔比星脂质体","renal_function_level":"肾功能正常","ccr_min":"60","ccr_max":"999","dose_unit":"mg/m²","dose_value":"20","dose_total_value":"","dose_description":"20mg/m²","adjustment_rule":"肾功能正常患者，建议20mg/m²给药","special_notes":"无","reference":"药品说明书"},{"drug_id":"gemcitabine","drug_name":"吉西他滨（泽非）","renal_function_level":"肾功能正常","ccr_min":"60","ccr_max":"999","dose_unit":"mg/m²","dose_value":"1000","dose_total_value":"","dose_description":"1000mg/m²","adjustment_rule":"肾功能正常患者，建议1000mg/m²给药","special_notes":"肾功能损伤患者慎用","reference":"药品说明书"},{"drug_id":"disitamab vedotin","drug_name":"维迪西妥单抗","renal_function_level":"肾功能正常","ccr_min":"60","ccr_max":"999","dose_unit":"","dose_value":"","dose_total_value":"","dose_description":"","adjustment_rule":"","special_notes":"","reference":"药品说明书"},{"drug_id":"pemetrexed disodium","drug_name":"培美曲塞二钠","renal_function_level":"肾功能正常","ccr_min":"45","ccr_max":"999","dose_unit":"mg/m²","dose_value":"500","dose_total_value":"","dose_description":"500mg/m²","adjustment_rule":"肌酐清除率≥45ml/min，建议以500mg/m²给药","special_notes":"无","reference":"药品说明书"},{"drug_id":"pemetrexed disodium","drug_name":"培美曲塞二钠","renal_function_level":"","ccr_min":"0","ccr_max":"44","dose_unit":"mg/m²","dose_value":"","dose_total_value":"","dose_description":"避免使用","adjustment_rule":"肌酐清除率＜45ml/min，不推荐使用","special_notes":"无","reference":"药品说明书"},{"drug_id":"carboplatin","drug_name":"卡铂","renal_function_level":"","ccr_min":"60","ccr_max":"999","dose_unit":"mg/m²","dose_value":"300-400","dose_total_value":"","dose_description":"300-400mg/m²","adjustment_rule":"肌酐清除率>60ml/min，建议以300-400mg/m²给药","special_notes":"无","reference":"药品说明书"},{"drug_id":"carboplatin","drug_name":"卡铂","renal_function_level":"","ccr_min":"0","ccr_max":"59","dose_unit":"mg/m²","dose_value":"","dose_total_value":"","dose_description":"减量使用","adjustment_rule":"肌酐清除率＜60ml/min，建议减量使用","special_notes":"无","reference":"药品说明书"},{"drug_id":"rituximab","drug_name":"利妥昔单抗","renal_function_level":"肾功能正常","ccr_min":"60","ccr_max":"999","dose_unit":"mg/m²","dose_value":"375","dose_total_value":"","dose_description":"375mg/m²","adjustment_rule":"肾功能正常患者，建议375mg/m²给药","special_notes":"无","reference":"药品说明书"},{"drug_id":"inetetamab","drug_name":"伊尼妥单抗","renal_function_level":"","ccr_min":"","ccr_max":"","dose_unit":"mg/kg","dose_value":"4","dose_total_value":"","dose_description":"","adjustment_rule":"","special_notes":"","reference":""},{"drug_id":"cetuximab solution","drug_name":"西妥昔单抗","renal_function_level":"肾功能正常","ccr_min":"60","ccr_max":"999","dose_unit":"mg/m²","dose_value":"400","dose_total_value":"","dose_description":"400mg/m²","adjustment_rule":"肾功能正常患者，建议400mg/m²给药","special_notes":"无","reference":"药品说明书"},{"drug_id":"tocilizumab","drug_name":"托珠单抗","renal_function_level":"肾功能正常","ccr_min":"60","ccr_max":"999","dose_unit":"mg/kg","dose_value":"8","dose_total_value":"","dose_description":"8mg/kg","adjustment_rule":"肾功能正常与轻度肾功能损伤患者，建议8mg/kg给药","special_notes":"无","reference":"药品说明书"},{"drug_id":"trastuzumab emtansine","drug_name":"恩美曲妥珠单抗","renal_function_level":"肾功能正常","ccr_min":"90","ccr_max":"999","dose_unit":"mg/kg","dose_value":"4","dose_total_value":"","dose_description":"3.6mg/kg","adjustment_rule":"肾功能正常患者，建议3.6mg/kg给药","special_notes":"无","reference":"药品说明书"},{"drug_id":"trastuzumab emtansine","drug_name":"恩美曲妥珠单抗","renal_function_level":"轻度肾功能不全","ccr_min":"60","ccr_max":"89","dose_unit":"mg/kg","dose_value":"4","dose_total_value":"","dose_description":"3.6mg/kg","adjustment_rule":"肌酐清除率60-89ml/min，建议以3.6mg/kg给药","special_notes":"无","reference":"药品说明书"},{"drug_id":"trastuzumab emtansine","drug_name":"恩美曲妥珠单抗","renal_function_level":"中度肾功能不全","ccr_min":"30","ccr_max":"59","dose_unit":"mg/kg","dose_value":"4","dose_total_value":"","dose_description":"3.6mg/kg","adjustment_rule":"肌酐清除率30-59ml/min，建议以3.6mg/kg给药","special_notes":"无","reference":"药品说明书"},{"drug_id":"trastuzumab emtansine","drug_name":"恩美曲妥珠单抗","renal_function_level":"重度肾功能不全","ccr_min":"15","ccr_max":"29","dose_unit":"mg/kg","dose_value":"","dose_total_value":"","dose_description":"","adjustment_rule":"肌酐清除率15-29ml/min，数据有限，无法提供给药剂量建议","special_notes":"无","reference":"药品说明书"},{"drug_id":"obinutuzumab","drug_name":"奥妥珠单抗","renal_function_level":"肾功能正常","ccr_min":"90","ccr_max":"999","dose_unit":"mg","dose_value":"1000","dose_total_value":"","dose_description":"1000mg","adjustment_rule":"肾功能正常患者，建议1000mg给药","special_notes":"无","reference":"药品说明书"},{"drug_id":"obinutuzumab","drug_name":"奥妥珠单抗","renal_function_level":"轻度肾功能不全","ccr_min":"50","ccr_max":"89","dose_unit":"mg","dose_value":"1000","dose_total_value":"","dose_description":"1000mg","adjustment_rule":"肌酐清除率50-89ml/min，建议以1000mg给药","special_notes":"无","reference":"药品说明书"},{"drug_id":"obinutuzumab","drug_name":"奥妥珠单抗","renal_function_level":"中度肾功能不全","ccr_min":"30","ccr_max":"49","dose_unit":"mg","dose_value":"1000","dose_total_value":"","dose_description":"1000mg","adjustment_rule":"肌酐清除率30-49ml/min，建议以1000mg给药","special_notes":"无","reference":"药品说明书"},{"drug_id":"obinutuzumab","drug_name":"奥妥珠单抗","renal_function_level":"重度肾功能不全","ccr_min":"15","ccr_max":"29","dose_unit":"mg","dose_value":"","dose_total_value":"","dose_description":"","adjustment_rule":"肌酐清除率15-29ml/min，数据有限，无法提供给药剂量建议","special_notes":"无","reference":"药品说明书"},{"drug_id":"trastuzumab","drug_name":"曲妥珠单抗","renal_function_level":"","ccr_min":"","ccr_max":"","dose_unit":"mg/kg","dose_value":"4","dose_total_value":"","dose_description":"400mg/kg","adjustment_rule":"","special_notes":"","reference":"药品说明书"},{"drug_id":"infliximab","drug_name":"英夫利西单抗","renal_function_level":"","ccr_min":"","ccr_max":"","dose_unit":"mg/kg","dose_value":"","dose_total_value":"","dose_description":"mg/kg","adjustment_rule":"","special_notes":"","reference":"药品说明书"},{"drug_id":"pertuzumab","drug_name":"帕妥珠单抗","renal_function_level":"肾功能正常","ccr_min":"60","ccr_max":"999","dose_unit":"mg","dose_value":"840","dose_total_value":"","dose_description":"840mg","adjustment_rule":"肾功能正常患者，建议840mg起始剂量给药，此后每三周给药一次，给药剂量为420mg","special_notes":"无","reference":"药品说明书"},{"drug_id":"bevacizumab","drug_name":"贝伐珠单抗","renal_function_level":"肾功能正常","ccr_min":"60","ccr_max":"999","dose_unit":"","dose_value":"","dose_total_value":"","dose_description":"","adjustment_rule":"","special_notes":"无","reference":"药品说明书"},{"drug_id":"nimotuzumab","drug_name":"尼妥珠单抗","renal_function_level":"","ccr_min":"","ccr_max":"","dose_unit":"","dose_value":"","dose_total_value":"","dose_description":"","adjustment_rule":"","special_notes":"","reference":"药品说明书"},{"drug_id":"carfilzomib","drug_name":"卡非佐米","renal_function_level":"","ccr_min":"","ccr_max":"","dose_unit":"","dose_value":"","dose_total_value":"","dose_description":"","adjustment_rule":"","special_notes":"","reference":"药品说明书"},{"drug_id":"ifosfamide","drug_name":"异环磷酰胺","renal_function_level":"","ccr_min":"","ccr_max":"","dose_unit":"g/m²","dose_value":"1.2-2.5","dose_total_value":"","dose_description":"1.2-2.5g/m²","adjustment_rule":"","special_notes":"","reference":"药品说明书"},{"drug_id":"methotrexate","drug_name":"甲氨蝶呤","renal_function_level":"","ccr_min":"","ccr_max":"","dose_unit":"mg  ;  mg/m²","dose_value":"10-50mg ; 20-30mg/m²","dose_total_value":"","dose_description":"成人一次10-50mg；儿童每日20-30mg/m²","adjustment_rule":"","special_notes":"","reference":"药品说明书"},{"drug_id":"paclitaxel","drug_name":"紫杉醇注射液","renal_function_level":"","ccr_min":"","ccr_max":"","dose_unit":"","dose_value":"","dose_total_value":"","dose_description":"","adjustment_rule":"","special_notes":"","reference":"药品说明书"},{"drug_id":"irinotecan hydrochloride","drug_name":"伊立替康(开普拓）","renal_function_level":"肾功能正常","ccr_min":"60","ccr_max":"999","dose_unit":"mg/m²","dose_value":"125","dose_total_value":"","dose_description":"125mg/m²","adjustment_rule":"肾功能正常患者，建议125mg/m²给药","special_notes":"密切监测肾功能","reference":"药品说明书"},{"drug_id":"cyclophosphamide","drug_name":"注射用环磷酰胺","renal_function_level":"","ccr_min":"","ccr_max":"","dose_unit":"","dose_value":"","dose_total_value":"","dose_description":"","adjustment_rule":"","special_notes":"","reference":"药品说明书"},{"drug_id":"tislelizumab","drug_name":"替雷利珠单抗","renal_function_level":"","ccr_min":"","ccr_max":"","dose_unit":"","dose_value":"","dose_total_value":"","dose_description":"","adjustment_rule":"","special_notes":"重度肾功能不全不推荐使用","reference":"药品说明书"},{"drug_id":"ivonescimab","drug_name":"依沃西单抗","renal_function_level":"轻度肾功能不全","ccr_min":"60","ccr_max":"90","dose_unit":"mg/kg","dose_value":"20","dose_total_value":"","dose_description":"20mg/m²","adjustment_rule":"轻度 60≤CLCr≤90或中度 30≤CLCr≤60肾功能不全患者无需进行剂量调整","special_notes":"无","reference":"药品说明书"},{"drug_id":"ivonescimab","drug_name":"依沃西单抗","renal_function_level":"中度肾功能不全","ccr_min":"30","ccr_max":"60","dose_unit":"mg/kg","dose_value":"20","dose_total_value":"","dose_description":"20mg/m²","adjustment_rule":"轻度 60≤CLCr≤90或中度 30≤CLCr≤60肾功能不全患者无需进行剂量调整","special_notes":"无","reference":"药品说明书"},{"drug_id":"sintilimab","drug_name":"信迪利单抗","renal_function_level":"肾功能正常","ccr_min":"60","ccr_max":"999","dose_unit":"mg","dose_value":"200","dose_total_value":"","dose_description":"200mg","adjustment_rule":"肾功能正常、轻度肾功能损伤中度肾功能损伤患者，建议200mg给药","special_notes":"重度肾功能不全患者慎用","reference":"药品说明书"},{"drug_id":"toripalimab","drug_name":"特瑞普利单抗","renal_function_level":"","ccr_min":"","ccr_max":"","dose_unit":"","dose_value":"","dose_total_value":"","dose_description":"","adjustment_rule":"","special_notes":"轻度和中度肾功能损伤患者慎用，重度肾功能损伤患者不推荐使用","reference":"药品说明书"},{"drug_id":"camrelizumab","drug_name":"卡瑞利珠单抗","renal_function_level":"肾功能正常","ccr_min":"60","ccr_max":"999","dose_unit":"mg","dose_value":"200","dose_total_value":"","dose_description":"200mg","adjustment_rule":"肾功能正常、轻度肾功能损伤患者，建议200mg给药","special_notes":"中度和重度肾功能损伤患者不推荐使用","reference":"药品说明书"}];
+</script>
+<script src="./supabase-config.js"></script>
+<script src="./supabase-cloud-adapter.js"></script>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const esc = (value) => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const toNum = (v) => { if (v === null || v === undefined || String(v).trim() === '') return null; const n = Number(v); return Number.isFinite(n) ? n : null; };
+  const fmt = (n, digits=1) => Number.isFinite(n) ? new Intl.NumberFormat('zh-CN',{minimumFractionDigits:0,maximumFractionDigits:digits}).format(n) : '—';
+  const fmtRange = (a) => a.length < 2 || Math.abs(a[0]-a[1]) < 1e-9 ? fmt(a[0],2) : `${fmt(a[0],2)}–${fmt(a[1],2)}`;
+  let usableRows=[];
+  let groups=[];
+  let byKey=new Map();
+  let databaseQr=Object.create(null);
+  let dbState={version:1,records:DATA_ROWS,qr:{}};
+  let dbConnected=false;
+  let dbAuthenticated=false;
+  let publicReadOnly=false;
+  let maintenanceToken='';
+  const authHeaders=(headers={})=>({...headers,...(maintenanceToken?{Authorization:`Bearer ${maintenanceToken}`}:{})});
+  function rebuildGroups(){
+    usableRows=DATA_ROWS.filter(r=>r.drug_id&&r.drug_name&&r.drug_id!=='药物英文名');
+    groups=[];byKey=new Map();
+    for(const r of usableRows){
+      const key=`${r.drug_id}||${r.drug_name}`;
+      if(!byKey.has(key)){const g={key,id:r.drug_id,name:r.drug_name,rows:[]};byKey.set(key,g);groups.push(g);}
+      byKey.get(key).rows.push(r);
+    }
+    $('recordCount').textContent=usableRows.length;
+    $('catalogCount').textContent=`载入 ${groups.length} 个药品条目 · ${usableRows.length} 条原始剂量资料`;
+  }
+
+  const state = { calculated:false, mode:'creatinine', age:null, sex:'male', height:null, weight:null, cgWeight:null, scr:null, cys:null, matchValue:null, matchSource:'', egfrIndexed:null, egfrScr:null, egfrCys:null, egfrCombined:null, mosteller:null, dubois:null, stage:null };
+  const selectedDrugKey = () => $('drugSelect').value;
+  const currentGroup = () => byKey.get(selectedDrugKey()) || null;
+  const dbRowById = (id) => usableRows.find(r => r._id === id) || null;
+
+  function activeSex(){ return document.querySelector('input[name="sex"]:checked')?.value || 'male'; }
+  function selectedMode(){ return document.querySelector('input[name="renalMode"]:checked')?.value || 'creatinine'; }
+  function setMetric(id, n, digits=1){ $(id).textContent = n === null || !Number.isFinite(n) ? '—' : fmt(n,digits); }
+  function setBsaMetric(id, n){ $(id).innerHTML = `${n === null || !Number.isFinite(n) ? '—' : fmt(n,3)} <small>m²</small>`; }
+  function stageFor(e){
+    if (e >= 90) return {code:'G1',name:'正常或偏高',tone:'good'};
+    if (e >= 60) return {code:'G2',name:'轻度降低',tone:'good'};
+    if (e >= 45) return {code:'G3a',name:'轻至中度降低',tone:'warn'};
+    if (e >= 30) return {code:'G3b',name:'中至重度降低',tone:'warn'};
+    if (e >= 15) return {code:'G4',name:'重度降低',tone:'danger'};
+    return {code:'G5',name:'肾衰竭范围',tone:'danger'};
+  }
+  function updateModeCopy(){
+    const mode=selectedMode();state.mode=mode;
+    $('methodNotice').className=mode==='creatinine'?'calc-note':'calc-note warning';
+    if(mode==='creatinine'){
+      $('matchTitle').textContent='Cockcroft–Gault CrCl';
+      $('matchMethod').textContent='mL/min · 直接对照 CSV CrCl 区间';
+      $('stageMethod').textContent='KDIGO G 分级 eGFR · CKD-EPI 2021 肌酐';
+      $('modeHint').textContent='使用血肌酐、年龄、性别与 CG 计算体重；KDIGO 分级另以 CKD-EPI 2021 肌酐单项 eGFR 计算。';
+      $('methodNotice').innerHTML='<b>当前方式：</b>药品区间匹配使用 Cockcroft–Gault CrCl；KDIGO G 分级使用 CKD-EPI 2021 肌酐单项 eGFR。';
+    }else if(mode==='cystatin'){
+      $('matchTitle').textContent='CysC eGFR 绝对值代理';
+      $('matchMethod').textContent='eGFRcys × Mosteller BSA / 1.73 · 代理匹配';
+      $('stageMethod').textContent='KDIGO G 分级 eGFR · CKD-EPI 2012 CysC';
+      $('modeHint').textContent='CysC 单项公式输出的是标准化 eGFR；需年龄、性别、CysC。匹配 CSV 前按 Mosteller BSA 去标化，作为非等价代理值。';
+      $('methodNotice').innerHTML='<b>代理匹配提醒：</b>CysC 单项计算结果是 eGFR，不是 CrCl。匹配 CSV 时使用 eGFR × Mosteller BSA / 1.73 得到的绝对 eGFR（mL/min）作为代理；与 CSV 所标 CrCl 可能不同，仅供比较并需专业复核。';
+    }else{
+      $('matchTitle').textContent='联合 eGFR 绝对值代理';
+      $('matchMethod').textContent='eGFRcr-cys × Mosteller BSA / 1.73 · 代理匹配';
+      $('stageMethod').textContent='KDIGO G 分级 eGFR · CKD-EPI 2021 联合';
+      $('modeHint').textContent='联合公式需要血肌酐、CysC、年龄、性别；KDIGO 分级使用标准化联合 eGFR，匹配时去标化值仅作为 CrCl 区间代理。';
+      $('methodNotice').innerHTML='<b>代理匹配提醒：</b>联合计算结果是标准化 eGFR，不是 CrCl。匹配 CSV 时使用 eGFRcr-cys × Mosteller BSA / 1.73 得到的绝对 eGFR（mL/min）作为代理；与 CSV 所标 CrCl 可能不同，仅供比较并需专业复核。';
+    }
+  }
+  function resetCalculatedDisplay(message='资料已修改，请点击“计算结果”更新。'){
+    state.calculated=false;state.matchValue=null;state.egfrIndexed=null;state.egfrScr=null;state.egfrCys=null;state.egfrCombined=null;state.mosteller=null;state.dubois=null;state.stage=null;state.matchSource='';
+    setMetric('matchValue',null,3);setMetric('egfrValue',null,3);setBsaMetric('mostellerValue',null);setBsaMetric('duboisValue',null);
+    const chip=$('stageChip');chip.className='stage-chip';chip.textContent='待计算';
+    document.querySelectorAll('.stage-step').forEach(el=>el.classList.remove('is-active'));
+    $('validationMessage').textContent=message?`　${message}`:'';
+    $('calcStatus').textContent='等待计算';
+    updateModeCopy();renderDrug();
+  }
+  function calculate(){
+    const age=toNum($('age').value),h=toNum($('height').value),w=toNum($('weight').value);
+    const scrInput=toNum($('scr').value),cysInput=toNum($('cys').value),sex=activeSex(),mode=selectedMode();
+    const cgW=$('syncWeight').checked?w:toNum($('cgWeight').value);
+    const scr=scrInput===null?null:($('scrUnit').value==='umol/L'?scrInput/88.4:scrInput);
+    const cys=cysInput===null?null:($('cysUnit').value==='mg/dL'?cysInput*10:cysInput);
+    const ageOK=age!==null&&age>=18&&age<=120;
+    const scrOK=scr!==null&&scr>0,cysOK=cys!==null&&cys>0;
+    const bsaOK=h!==null&&h>0&&w!==null&&w>0;
+    const mosteller=bsaOK?Math.sqrt(h*w/3600):null;
+    const dubois=bsaOK?0.007184*Math.pow(h,0.725)*Math.pow(w,0.425):null;
+    let crcl=null,egfrScr=null,egfrCys=null,egfrCombined=null;
+    if(ageOK&&scrOK){
+      const female=sex==='female',k=female?0.7:0.9,alpha=female?-0.241:-0.302;
+      crcl=mode==='creatinine'&&cgW!==null&&cgW>0?((140-age)*cgW/(72*scr))*(female?0.85:1):null;
+      egfrScr=142*Math.pow(Math.min(scr/k,1),alpha)*Math.pow(Math.max(scr/k,1),-1.200)*Math.pow(0.9938,age)*(female?1.012:1);
+    }
+    if(ageOK&&cysOK){
+      const female=sex==='female';
+      egfrCys=133*Math.pow(Math.min(cys/0.8,1),-0.499)*Math.pow(Math.max(cys/0.8,1),-1.328)*Math.pow(0.996,age)*(female?0.932:1);
+    }
+    if(ageOK&&scrOK&&cysOK){
+      const female=sex==='female',k=female?0.7:0.9,alpha=female?-0.219:-0.144;
+      egfrCombined=135*Math.pow(Math.min(scr/k,1),alpha)*Math.pow(Math.max(scr/k,1),-0.544)*Math.pow(Math.min(cys/0.8,1),-0.323)*Math.pow(Math.max(cys/0.8,1),-0.778)*Math.pow(0.9961,age)*(female?0.963:1);
+    }
+    const egfrIndexed=mode==='creatinine'?egfrScr:(mode==='cystatin'?egfrCys:egfrCombined);
+    const matchValue=mode==='creatinine'?crcl:(egfrIndexed!==null&&mosteller!==null?egfrIndexed*mosteller/1.73:null);
+    const requiredOk=ageOK&&(mode==='creatinine'?(scrOK&&cgW!==null&&cgW>0):(mode==='cystatin'?cysOK:(scrOK&&cysOK)));
+    state.calculated=true;state.mode=mode;state.age=age;state.sex=sex;state.height=h;state.weight=w;state.cgWeight=cgW;state.scr=scr;state.cys=cys;
+    state.matchValue=requiredOk?matchValue:null;state.matchSource=mode;state.egfrIndexed=egfrIndexed;state.egfrScr=egfrScr;state.egfrCys=egfrCys;state.egfrCombined=egfrCombined;state.mosteller=mosteller;state.dubois=dubois;state.stage=egfrIndexed===null?null:stageFor(egfrIndexed);
+    setMetric('matchValue',state.matchValue,3);setMetric('egfrValue',egfrIndexed,3);setBsaMetric('mostellerValue',mosteller);setBsaMetric('duboisValue',dubois);
+    const chip=$('stageChip');chip.className='stage-chip';
+    if(state.stage){chip.textContent=`${state.stage.code} · ${state.stage.name}`;chip.classList.add('active');if(state.stage.tone==='warn')chip.classList.add('stage-warn');if(state.stage.tone==='danger')chip.classList.add('stage-danger');}
+    else chip.textContent='缺少所选公式所需数据';
+    document.querySelectorAll('.stage-step').forEach(el=>el.classList.toggle('is-active',!!state.stage&&el.dataset.stage===state.stage.code));
+    const missing=[];
+    if(!ageOK)missing.push('年龄需为 18–120 岁');
+    if(mode==='creatinine'&&!scrOK)missing.push('血肌酐需大于 0');
+    if(mode==='creatinine'&&(!cgW||cgW<=0))missing.push('CrCl 需计算体重');
+    if(mode==='cystatin'&&!cysOK)missing.push('胱抑素 C 需大于 0');
+    if(mode==='combined'&&(!scrOK||!cysOK))missing.push('联合计算需同时填写血肌酐和胱抑素 C');
+    if(mode!=='creatinine'&&egfrIndexed!==null&&mosteller===null)missing.push('eGFR 已算出；需填写身高与体重才能去标化并匹配 CSV 区间');
+    $('validationMessage').textContent=missing.length?`　${missing.join('；')}。`:'';
+    $('calcStatus').textContent=state.matchValue!==null?'已计算 · 可查看剂量匹配':(state.stage?'已计算 eGFR · 尚不能匹配剂量':'缺少必需数据');
+    updateModeCopy();renderDrug();
+  }
+
+  function parseDoseRange(value){
+    const s=String(value??'').trim().replace(/,/g,'');
+    const m=s.match(/^\s*(-?\d+(?:\.\d+)?)\s*(?:[-–—~～至]\s*(-?\d+(?:\.\d+)?))?\s*$/);
+    if(!m)return null;
+    const a=Number(m[1]),b=m[2]===undefined?a:Number(m[2]);
+    return Number.isFinite(a)&&Number.isFinite(b)?[Math.min(a,b),Math.max(a,b)]:null;
+  }
+  function unitKey(unit){return String(unit||'').toLowerCase().replace(/\s/g,'').replace('²','2');}
+  function conflictReason(row){
+    const id=row.drug_id;
+    const low=toNum(row.ccr_min);
+    if(id==='trastuzumab emtansine' && row.dose_value) return '结构化剂量为 4 mg/kg，但剂量描述为 3.6 mg/kg';
+    if(id==='ivonescimab') return '结构化剂量单位为 mg/kg，但剂量描述写为 mg/m²';
+    if(id==='raltitrexed' && low!==null && low>=25 && low<=55 && row.dose_value) return '结构化剂量值与剂量描述中的数值不一致';
+    if(id==='trastuzumab' && row.dose_value) return '结构化剂量为 4 mg/kg，但剂量描述为 400 mg/kg';
+    if(id==='methotrexate') return '源记录为混合单位及不同人群方案';
+    return '';
+  }
+  function intervalText(row){
+    const lo=toNum(row.ccr_min),hi=toNum(row.ccr_max);
+    if(lo===null&&hi===null)return '未提供 CrCl 区间';
+    if(lo!==null&&(hi===null||hi>=999))return `CrCl ≥ ${fmt(lo,2)} mL/min`;
+    if(lo===null)return `CrCl ≤ ${fmt(hi,2)} mL/min`;
+    if(lo===hi)return `CrCl = ${fmt(lo,2)} mL/min`;
+    return `CrCl ${fmt(lo,2)}–${fmt(hi,2)} mL/min`;
+  }
+  function matchRows(group,crcl){
+    return group.rows.filter(row=>{
+      const lo=toNum(row.ccr_min),hi=toNum(row.ccr_max);
+      if(lo===null&&hi===null)return false;
+      if(lo!==null&&crcl<lo)return false;
+      if(hi!==null&&hi<999&&crcl>hi)return false;
+      return true;
+    });
+  }
+  function doseMath(row){
+    const conflict=conflictReason(row);
+    if(conflict)return `<div class="dose-alert danger" style="margin:10px 0 0"><b>自动换算已停用：</b>${esc(conflict)}。保留上传原文供人工核对，不用不一致字段推算总量。</div>`;
+    const vals=parseDoseRange(row.dose_value);
+    if(!row.dose_value||!vals){
+      const note=row.dose_description||row.adjustment_rule||'上传数据未提供可计算的数值剂量。';
+      return `<div class="calc-box full fixed" style="margin-top:10px"><span class="calc-label">剂量换算状态</span><strong>无可自动换算的数值剂量</strong><small>${esc(note)}</small></div>`;
+    }
+    const u=unitKey(row.dose_unit);
+    const original=`${fmtRange(vals)} ${esc(row.dose_unit||'')}`.trim();
+    if(u==='mg/m2'||u==='mg/m²'){
+      if(state.mosteller===null||state.dubois===null)return `<div class="calc-box full fixed" style="margin-top:10px"><span class="calc-label">结构化剂量</span><strong>${original}</strong><small>补全身高与实际体重后，才能分别按 Mosteller 与 Du Bois BSA 换算总量。</small></div>`;
+      const a=vals.map(x=>x*state.mosteller),b=vals.map(x=>x*state.dubois);
+      return `<div class="dose-compute"><div class="calc-box"><span class="calc-label">Mosteller · BSA ${fmt(state.mosteller,3)} m²</span><strong>${fmtRange(a)} mg</strong><small>原表 ${original} × Mosteller BSA</small></div><div class="calc-box"><span class="calc-label">Du Bois · BSA ${fmt(state.dubois,3)} m²</span><strong>${fmtRange(b)} mg</strong><small>原表 ${original} × Du Bois BSA</small></div></div><p class="calc-caution">仅为单位换算乘积，未按药品规格取整，也未纳入疗程、上限或个体方案调整。</p>`;
+    }
+    if(u==='g/m2'){
+      if(state.mosteller===null||state.dubois===null)return `<div class="calc-box full fixed" style="margin-top:10px"><span class="calc-label">结构化剂量</span><strong>${original}</strong><small>补全身高与实际体重后才能换算总量。</small></div>`;
+      const a=vals.map(x=>x*state.mosteller),b=vals.map(x=>x*state.dubois);
+      return `<div class="dose-compute"><div class="calc-box"><span class="calc-label">Mosteller · BSA ${fmt(state.mosteller,3)} m²</span><strong>${fmtRange(a)} g</strong><small>原表 ${original} × Mosteller BSA</small></div><div class="calc-box"><span class="calc-label">Du Bois · BSA ${fmt(state.dubois,3)} m²</span><strong>${fmtRange(b)} g</strong><small>原表 ${original} × Du Bois BSA</small></div></div><p class="calc-caution">仅为单位换算乘积，未按制剂规格取整。</p>`;
+    }
+    if(u==='mg/kg'){
+      if(state.weight===null)return `<div class="calc-box full fixed" style="margin-top:10px"><span class="calc-label">结构化剂量</span><strong>${original}</strong><small>填写实际体重后才能计算理论总量。</small></div>`;
+      const total=vals.map(x=>x*state.weight);
+      return `<div class="calc-box full"><span class="calc-label">按实际体重 ${fmt(state.weight,1)} kg 换算 · 结构化剂量 ${original}</span><strong>${fmtRange(total)} mg</strong><small>mg/kg × 实际体重；未按剂量上限、疗程或制剂规格取整。</small></div>`;
+    }
+    if(u==='mg/d'){
+      return `<div class="calc-box full fixed" style="margin-top:10px"><span class="calc-label">上传数据中的日剂量（不是单次给药量）</span><strong>${fmtRange(vals)} mg/d</strong><small>此单位表示每日剂量；频次/疗程与单次量须核对原始说明书。</small></div>`;
+    }
+    if(u==='mg'){
+      let extra='上传字段为固定 mg 数值，未按体表面积或体重缩放。';
+      if(row.drug_id==='pertuzumab')extra='原文还包含起始剂量 840 mg 与之后每三周 420 mg 的阶段信息；请按治疗阶段核对，不能把两者视为同一剂量。';
+      return `<div class="calc-box full fixed" style="margin-top:10px"><span class="calc-label">上传结构化固定剂量</span><strong>${fmtRange(vals)} mg</strong><small>${esc(extra)}</small></div>`;
+    }
+    return `<div class="dose-alert info" style="margin:10px 0 0">剂量单位“${esc(row.dose_unit||'未填写')}”或数值格式无法可靠解析；仅显示上传原文，不自动换算。</div>`;
+  }
+  function isAvoid(row){
+    // Flag only the matched row's actual dosing/adjustment instruction, not a broad special note.
+    const text=`${row.dose_description||''} ${row.adjustment_rule||''}`;
+    return /避免使用|禁忌|不推荐使用|禁用/.test(text);
+  }
+  function renderMatch(row){
+    const avoid=isAvoid(row);
+    const level=row.renal_function_level&&row.renal_function_level!=='肾功能正常'?row.renal_function_level:(row.renal_function_level||'按 CSV CrCl 区间匹配');
+    const desc=row.dose_description||row.adjustment_rule||'上传资料未提供该区间的剂量描述。';
+    const tags=[];
+    if(row.adjustment_rule&&row.adjustment_rule!=='无'&&row.adjustment_rule!==row.dose_description)tags.push(`<span class="note-tag warn">具体意见：${esc(row.adjustment_rule)}</span>`);
+    if(row.special_notes&&row.special_notes!=='无')tags.push(`<span class="note-tag warn">特别提示：${esc(row.special_notes)}</span>`);
+    if(row.reference)tags.push(`<span class="note-tag">来源字段：${esc(row.reference)}</span>`);
+    if(row.dose_total_value)tags.push(`<span class="note-tag">原始总剂量：${esc(row.dose_total_value)}</span>`);
+    return `<article class="match-card ${avoid?'avoid':''}"><div class="match-head"><div><h3>${esc(row.renal_function_level||'剂量资料匹配')}</h3><p class="match-level">结构化范围：${esc(intervalText(row))}</p></div><span class="match-range">${avoid?'需避免/不推荐 · ':''}${esc(intervalText(row))}</span></div><div class="raw-label">上传数据原文</div><p class="raw-dose">${esc(desc)}</p>${row.dose_value?`<p class="match-level">结构化剂量字段：${esc(row.dose_value)} ${esc(row.dose_unit||'')}</p>`:''}${doseMath(row)}${tags.length?`<div class="match-notes">${tags.join('')}</div>`:''}</article>`;
+  }
+  function rowDoseSummary(row){
+    const structured=row.dose_value?`${row.dose_value}${row.dose_unit?` ${row.dose_unit}`:''}`:'';
+    return [structured,row.dose_description].filter(Boolean).join(' ｜ ')||'—';
+  }
+  function renderSourceTable(group){
+    if(!group)return '';
+    return `<div class="source-table-wrap"><div class="table-caption"><span>该药在上传 CSV 中的全部记录</span><small>范围按原数字字段展示；999 视作开放上限</small></div><div class="table-scroll"><table><thead><tr><th>肾功能字段</th><th>CrCl 数值范围</th><th>剂量字段 / 原文</th><th>具体意见</th><th>特别提示</th></tr></thead><tbody>${group.rows.map(r=>`<tr><td>${esc(r.renal_function_level||'未标注')}</td><td>${esc(intervalText(r))}</td><td>${esc(rowDoseSummary(r))}</td><td>${esc(r.adjustment_rule||'—')}</td><td>${esc(r.special_notes||'—')}</td></tr>`).join('')}</tbody></table></div></div>`;
+  }
+  function renderDrug(){
+    const group=currentGroup(),output=$('doseOutput');
+    if(!group){output.innerHTML='<div class="empty-state"><span class="empty-icon">Rx</span><span>没有找到对应药品。请更换搜索词。</span></div>'; $('sourceTable').innerHTML=''; updateQr(); return;}
+    if(!state.calculated){
+      output.innerHTML=`<div class="dose-alert info">请先填写所选估算方式需要的患者/检验资料，再点击“计算结果”。</div><div class="empty-state"><span class="empty-icon">↳</span><span><b>${esc(group.name)}</b>：计算完成后，才会用本次区间匹配值检索 CSV 规则。</span></div>`;
+    }else if(state.matchValue===null){
+      const detail=state.mode==='creatinine'?'此模式需年龄、血肌酐及 Cockcroft–Gault 计算体重。':'CysC/联合 eGFR 可显示标准化结果；要作为绝对值代理匹配 CSV，还需年龄、相应检验值、身高与实际体重。';
+      output.innerHTML=`<div class="dose-alert info">尚无可用于药品区间匹配的数值。${esc(detail)} 请查看计算结果区的缺项提示并补齐资料。</div><div class="empty-state"><span class="empty-icon">!</span><span>没有匹配值时不提供剂量匹配结果；不会用其他指标自动替代。</span></div>`;
+    }else{
+      const matches=matchRows(group,state.matchValue);
+      const proxy=state.mode!=='creatinine';
+      const metricName=proxy?'去标化 eGFR 代理值（并非 CrCl）':'Cockcroft–Gault CrCl';
+      const caution=proxy?'该值为 eGFR × Mosteller BSA / 1.73，用作 CSV CrCl 区间的非等价代理；与 CrCl 可能不同，需人工核实。':'仅使用上传文件的结构化 CrCl 数值区间（端点按包含处理）。';
+      if(matches.length){
+        const overlap=matches.length>1?`<div class="dose-alert">源数据区间有重叠，当前匹配值命中 ${matches.length} 条；页面逐条原样列出，不自行选择其中一条。</div>`:'';
+        output.innerHTML=`<div class="dose-alert ${proxy?'':'info'}">用于本次匹配的${metricName}：<b>${fmt(state.matchValue,3)} mL/min</b>。${caution}</div>${overlap}${matches.map(renderMatch).join('')}`;
+      }else{
+        const hasRanges=group.rows.some(r=>toNum(r.ccr_min)!==null||toNum(r.ccr_max)!==null);
+        output.innerHTML=`<div class="dose-alert ${hasRanges?'danger':'info'}">本次${metricName}为 <b>${fmt(state.matchValue,3)} mL/min</b>。${hasRanges?'未命中该药在 CSV 中的任一结构化区间，不跨区间外推。':'上传数据未提供该药按 CrCl 分层的规则，不自动推算剂量。'} ${caution}</div><div class="empty-state"><span class="empty-icon">!</span><span>请核对药品现行说明书和临床方案。该药的 CSV 原始记录仍列在下方供查看。</span></div>`;
+      }
+    }
+    $('sourceTable').innerHTML=renderSourceTable(group);updateQr();
+  }
+  function populateSelect(filter='',preferred=''){
+    const select=$('drugSelect');
+    const current=preferred||select.value;
+    const q=filter.trim().toLocaleLowerCase();
+    const filtered=groups.filter(g=>!q||`${g.name} ${g.id}`.toLocaleLowerCase().includes(q));
+    select.innerHTML='';
+    if(!filtered.length){select.innerHTML='<option value="">无匹配药品</option>';select.disabled=true;return;}
+    select.disabled=false;
+    filtered.forEach(g=>{const o=document.createElement('option');o.value=g.key;o.textContent=`${g.name} · ${g.id}`;select.appendChild(o);});
+    if(filtered.some(g=>g.key===current))select.value=current;
+    else select.value=filtered[0].key;
+  }
+  const DB_FIELDS=['drug_id','drug_name','renal_function_level','ccr_min','ccr_max','dose_unit','dose_value','dose_total_value','dose_description','adjustment_rule','special_notes','reference'];
+  function setDbStatus(text,tone=''){
+    const el=$('dbStatus');el.textContent=text;el.className='heading-actions small-tag'+(tone==='ok'?' db-status-ok':tone==='error'?' db-status-error':'');
+  }
+  function updateMaintenanceControls(){
+    const canManage=dbConnected&&dbAuthenticated&&!publicReadOnly;
+    ['importButton','addRecord','exportCsv','exportJson'].forEach(id=>{if($(id))$(id).disabled=!canManage;});
+  }
+  function setMaintenanceAuth(authenticated,username='admin'){
+    dbAuthenticated=!!authenticated&&!publicReadOnly;
+    if(!dbAuthenticated)maintenanceToken='';
+    const canViewMaintenance=publicReadOnly||dbAuthenticated;
+    $('maintenanceLoginPanel').classList.toggle('hidden',publicReadOnly||dbAuthenticated);
+    $('dbAdminContent').classList.toggle('hidden',!canViewMaintenance);
+    $('maintenanceSessionMessage').textContent=publicReadOnly?'公开只读模式：可查看数据，不可修改。':`已登录维护账号：${username||'admin'}`;
+    $('dbLogoutButton').classList.toggle('hidden',publicReadOnly);
+    updateMaintenanceControls();renderDatabaseTable();
+  }
+  async function checkMaintenanceAuth(){
+    try{
+      const configResponse=await fetch('/api/config',{cache:'no-store'});
+      const config=configResponse.ok?await configResponse.json():{};
+      publicReadOnly=!!config.readOnly;
+      if(publicReadOnly){setMaintenanceAuth(false);return;}
+      const response=await fetch('/api/auth',{cache:'no-store',headers:authHeaders()});
+      const auth=await response.json();
+      setMaintenanceAuth(!!(response.ok&&auth.authenticated),auth.username||'admin');
+    }catch(error){setMaintenanceAuth(false);}
+  }
+  async function loginMaintenance(event){
+    event.preventDefault();
+    const button=$('dbLoginButton'),message=$('dbLoginMessage');
+    const username=$('dbUsername').value.trim(),password=$('dbPassword').value;
+    button.disabled=true;message.textContent='正在验证账号…';
+    try{
+      let response=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})});
+      const contentType=response.headers?.get?.('content-type')||'';
+      if([405,501].includes(response.status)||!contentType.toLowerCase().includes('application/json')){
+        const basic=btoa(unescape(encodeURIComponent(`${username}:${password}`)));
+        response=await fetch('/api/login',{method:'GET',headers:{Authorization:`Basic ${basic}`},cache:'no-store'});
+      }
+      const text=await response.text();let result;
+      try{result=JSON.parse(text);}catch(error){throw new Error(`登录接口返回异常（HTTP ${response.status}）：${text.slice(0,140)}`);}
+      if(!response.ok)throw new Error(result.error||'登录失败');
+      $('dbPassword').value='';message.textContent='';maintenanceToken=result.token||'';
+      setMaintenanceAuth(true,result.username||'admin');
+      await loadDatabase(selectedDrugKey());
+    }catch(error){
+      const detail=error.message||'登录失败';
+      message.textContent=/HTTP 404/.test(detail)&&/\/api\/login/.test(detail)
+        ? '云端登录接口不可用。请检查 Supabase Project URL、管理员 Auth 邮箱、Auth 用户及管理员白名单配置。'
+        : detail;
+      setMaintenanceAuth(false);
+    }finally{button.disabled=false;}
+  }
+  async function logoutMaintenance(){
+    try{await fetch('/api/logout',{method:'POST',headers:authHeaders()});}catch(error){}
+    $('dbPassword').value='';setMaintenanceAuth(false);$('dbLoginMessage').textContent='已退出登录。';
+  }
+  function applyDatabase(db,preferred=''){
+    dbState={version:1,records:Array.isArray(db.records)?db.records:[],qr:db.qr||{}};
+    DATA_ROWS=dbState.records;databaseQr=dbState.qr;dbConnected=true;
+    rebuildGroups();populateSelect('',preferred||selectedDrugKey());
+    $('dbCount').textContent=`${usableRows.length} 条规则 · ${groups.length} 个药品`;
+    $('dbSyncNote').textContent='数据库已连接；编辑/导入保存后会同步刷新匹配结果。';
+    setDbStatus('数据库已连接','ok');
+    updateMaintenanceControls();renderDatabaseTable();renderDrug();
+  }
+  function renderDatabaseTable(){
+    const body=$('databaseRows');if(!body)return;
+    const canManage=dbConnected&&dbAuthenticated&&!publicReadOnly;
+    const q=($('dbSearch')?.value||'').trim().toLocaleLowerCase();
+    const rows=usableRows.filter(r=>!q||`${r.drug_name} ${r.drug_id} ${r.renal_function_level} ${r.ccr_min} ${r.ccr_max} ${r.dose_value} ${r.dose_unit} ${r.dose_description}`.toLocaleLowerCase().includes(q));
+    if(!rows.length){body.innerHTML='<tr><td colspan="7">没有匹配的药品规则。</td></tr>';return;}
+    body.innerHTML=rows.map(r=>{
+      const key=`${r.drug_id}||${r.drug_name}`,qrItem=databaseQr[key],hasQr=!!qrItem;
+      const description=[rowDoseSummary(r),r.adjustment_rule].filter(Boolean).join(' · ');
+      return `<tr><td class="db-name"><b>${esc(r.drug_name)}</b><small>${esc(r.drug_id)}</small></td><td>${esc(r.renal_function_level||'未标注')}</td><td>${esc(intervalText(r))}</td><td class="db-dose">${esc(description||'—')}</td><td><span class="db-qr-badge ${hasQr?'ready':''}">${hasQr?'已绑定图片':'未绑定'}</span>${hasQr?`<small class="db-qr-filename">${esc(qrItem.originalName||qrItem.filename||'')}</small><button class="row-action delete qr-remove" type="button" data-action="delete-qr" data-qr-key="${esc(key)}" data-drug-name="${esc(r.drug_name)}" ${canManage?'':'disabled'}>移除二维码</button>`:''}</td><td><div class="qr-inline-tools"><button class="row-action qr-file-pick" type="button" data-action="choose-qr" data-id="${esc(r._id||'')}" ${canManage?'':'disabled'}>选择图片</button><input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-qr-upload="1" data-qr-key="${esc(key)}" data-drug-name="${esc(r.drug_name)}" aria-label="为${esc(r.drug_name)}选择说明书二维码" hidden ${canManage?'':'disabled'}><button class="row-action" type="button" data-action="save-qr" data-id="${esc(r._id||'')}" ${canManage?'disabled':''}>保存</button><small class="qr-row-file-name">${hasQr?'已保存，可重新上传':'选择图片后点击保存'}</small></div></td><td><div class="row-actions"><button class="row-action" type="button" data-action="edit" data-id="${esc(r._id||'')}" ${canManage?'':'disabled'}>编辑</button><button class="row-action delete" type="button" data-action="delete" data-id="${esc(r._id||'')}" ${canManage?'':'disabled'}>删除</button></div></td></tr>`;
+    }).join('');
+  }
+  async function loadDatabase(preferred=''){
+    const selection=preferred||selectedDrugKey()||groups[0]?.key||'';
+    try{
+      const response=await fetch('/api/db',{cache:'no-store'});
+      if(!response.ok)throw new Error('数据库服务未响应');
+      const db=await response.json();
+      applyDatabase(db,selection||groups[0]?.key||'');
+    }catch(error){
+      dbConnected=false;databaseQr=Object.create(null);dbState={version:1,records:DATA_ROWS,qr:{}};
+      rebuildGroups();populateSelect('',selection||groups[0]?.key||'');
+      $('dbCount').textContent=`${usableRows.length} 条内置规则 · 维护服务未连接`;
+      $('dbSyncNote').textContent='当前显示内置只读备份：请检查 Supabase 配置、数据库表与 RLS。云端未连接时，维护写入及二维码上传会禁用。';
+      setDbStatus('数据库未连接','error');
+      updateMaintenanceControls();renderDatabaseTable();renderDrug();
+    }
+  }
+  async function saveRecords(records,preferred='',qrOverride=null){
+    if(!dbConnected)throw new Error('数据库服务未连接，无法持久保存。');
+    if(publicReadOnly)throw new Error('当前公开站点为只读模式，不能修改数据库。');
+    if(!dbAuthenticated)throw new Error('请先登录数据库维护。');
+    setDbStatus('正在保存…');
+    const payload={records,qr:qrOverride||databaseQr};
+    const response=await fetch('/api/db',{method:'POST',headers:authHeaders({'Content-Type':'application/json'}),body:JSON.stringify(payload)});
+    const result=await response.json();
+    if(response.status===401){setMaintenanceAuth(false);throw new Error('维护登录已过期，请重新登录。');}
+    if(!response.ok)throw new Error(result.error||'保存失败');
+    applyDatabase(result,preferred);return result;
+  }
+  function downloadFile(filename,content,type){
+    const blob=content instanceof Blob?content:new Blob([content],{type});
+    const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=filename;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(link.href),1000);
+  }
+  function exportCsv(){
+    const quote=value=>`"${String(value??'').replace(/"/g,'""')}"`;
+    const text=[DB_FIELDS.map(quote).join(','),...usableRows.map(r=>DB_FIELDS.map(k=>quote(r[k]||'')).join(','))].join('\r\n');
+    downloadFile('renal_dose_database.csv','\ufeff'+text,'text/csv;charset=utf-8');
+  }
+  function openRecordModal(record=null){
+    $('recordForm').reset();$('f-id').value=record?record._id||'':'';
+    DB_FIELDS.forEach(key=>{const field=$(`f-${key}`);if(field)field.value=record?record[key]||'':'';});
+    $('recordModalTitle').textContent=record?'编辑剂量规则':'新增剂量规则';
+    $('recordModal').classList.remove('hidden');$('f-drug_id').focus();
+  }
+  function closeRecordModal(){$('recordModal').classList.add('hidden');}
+  async function deleteRecord(id){
+    const row=dbRowById(id);if(!row)return;
+    if(!window.confirm(`确定删除“${row.drug_name}”的这条剂量规则吗？`))return;
+    try{await saveRecords(usableRows.filter(r=>r._id!==id),selectedDrugKey());}
+    catch(error){setDbStatus(error.message,'error');}
+  }
+  async function importDatabaseFile(){
+    const file=$('importFile').files?.[0];if(!file){setDbStatus('请先选择 .xlsx 或 .csv 文件','error');return;}
+    if(!dbConnected){setDbStatus('数据库服务未连接','error');return;}
+    if(publicReadOnly){setDbStatus('当前公开站点为只读模式','error');return;}
+    if(!dbAuthenticated){setDbStatus('请先登录数据库维护','error');return;}
+    $('importButton').disabled=true;setDbStatus('正在导入…');
+    try{
+      const url=`/api/import?mode=${encodeURIComponent($('importMode').value)}&filename=${encodeURIComponent(file.name)}`;
+      const response=await fetch(url,{method:'POST',headers:authHeaders({'Content-Type':file.type||'application/octet-stream'}),body:file});
+      const result=await response.json();if(response.status===401){setMaintenanceAuth(false);throw new Error('维护登录已过期，请重新登录。');}if(!response.ok)throw new Error(result.error||'导入失败');
+      applyDatabase(result.db,selectedDrugKey());
+      $('dbSyncNote').textContent=`导入完成：读取 ${result.imported} 条，当前数据库共 ${result.total} 条。`;
+      $('importFile').value='';$('importFileName').textContent='尚未选择文件';
+    }catch(error){setDbStatus(error.message,'error');$('dbSyncNote').textContent='导入失败；当前数据库未更改。';}
+    finally{$('importButton').disabled=false;}
+  }
+  async function persistQrImage(file,key,drugName){
+    if(!dbConnected)throw new Error('数据库服务未连接，无法持久保存二维码。');
+    if(publicReadOnly)throw new Error('当前公开站点为只读模式，不能上传二维码。');
+    if(!dbAuthenticated)throw new Error('请先登录数据库维护，再上传二维码。');
+    if(!file)throw new Error('请先选择二维码图片。');
+    const allowed=['image/png','image/jpeg','image/webp','image/gif'];
+    if(!allowed.includes(file.type))throw new Error('请选择 PNG、JPG、WebP 或 GIF 图片。');
+    if(file.size>8*1024*1024)throw new Error('图片超过 8 MB，请压缩后再上传。');
+    const url=`/api/qr?key=${encodeURIComponent(key)}&filename=${encodeURIComponent(file.name)}`;
+    const response=await fetch(url,{method:'POST',headers:authHeaders({'Content-Type':file.type}),body:file});
+    const result=await response.json();if(response.status===401){setMaintenanceAuth(false);throw new Error('维护登录已过期，请重新登录。');}if(!response.ok)throw new Error(result.error||'上传失败');
+    dbState=result.database;databaseQr=dbState.qr||{};renderDatabaseTable();updateQr();
+    return result;
+  }
+  async function saveQrFromRow(button){
+    const row=button.closest('tr'),input=row?.querySelector('input[data-qr-upload]'),file=input?.files?.[0];
+    if(!input||!file){setDbStatus('请先选择说明书二维码图片。','error');return;}
+    const name=input.dataset.drugName||'该药品';
+    button.disabled=true;button.textContent='保存中…';
+    try{
+      await persistQrImage(file,input.dataset.qrKey,name);
+      $('dbSyncNote').textContent=`已将说明书二维码保存并关联到“${name}”；计算页现已同步。`;
+      setDbStatus('二维码已保存','ok');
+    }catch(error){
+      setDbStatus(error.message,'error');
+      if(button.isConnected){button.disabled=false;button.textContent='保存';}
+    }
+  }
+  async function removeQrFromDb(button){
+    if(!dbConnected||!dbAuthenticated||publicReadOnly)return;
+    const key=button.dataset.qrKey,name=button.dataset.drugName||'该药品';
+    if(!window.confirm(`确定移除“${name}”已保存的说明书二维码吗？`))return;
+    try{
+      const response=await fetch(`/api/qr?key=${encodeURIComponent(key)}`,{method:'DELETE',headers:authHeaders()});
+      const result=await response.json();if(response.status===401){setMaintenanceAuth(false);throw new Error('维护登录已过期，请重新登录。');}if(!response.ok)throw new Error(result.error||'移除失败');
+      dbState=result;databaseQr=result.qr||{};renderDatabaseTable();updateQr();
+      $('dbSyncNote').textContent=`已移除“${name}”的二维码关联；计算页已同步。`;
+      setDbStatus('二维码关联已移除','ok');
+    }catch(error){setDbStatus(error.message,'error');}
+  }
+  function updateQr(){
+    const group=currentGroup(),preview=$('qrPreview'),imgData=group?databaseQr[group.key]:null;
+    const name=group?group.name:'未选择药品';
+    if(imgData){
+      const src=`${esc(imgData.url)}?v=${encodeURIComponent(imgData.updatedAt||'')}`;
+      preview.innerHTML=`<div class="qr-image-panel"><div class="qr-current-name">当前选择药品：<b>${esc(name)}</b></div><img src="${src}" alt="${esc(name)}说明书二维码"><div class="qr-file-name">数据库图片 · ${esc(imgData.originalName||imgData.filename||'说明书二维码')}</div></div>`;
+    }else{
+      preview.innerHTML=`<div class="qr-empty-panel"><div class="qr-current-name">当前选择药品：<b>${esc(name)}</b></div><div class="qr-placeholder-icon">▦</div><p class="qr-empty-title">暂无数据库二维码图片</p><p>${dbConnected?'请在数据库维护中为该药品上传并保存真实说明书二维码。':'数据库未连接，无法读取二维码图片。'}</p></div>`;
+    }
+  }
+
+  // Explicit calculation button: edits invalidate previous results until recalculated.
+  const markDirty=()=>resetCalculatedDisplay('输入已更改，点击“计算结果”后再查看剂量匹配。');
+  ['age','height','weight','scr','cys'].forEach(id=>$(id).addEventListener('input',()=>{
+    if(id==='weight'&&$('syncWeight').checked)$('cgWeight').value=$('weight').value;
+    markDirty();
+  }));
+  ['scrUnit','cysUnit'].forEach(id=>$(id).addEventListener('change',markDirty));
+  $('cgWeight').addEventListener('input',markDirty);
+  $('syncWeight').addEventListener('change',()=>{
+    $('cgWeight').disabled=$('syncWeight').checked;
+    if($('syncWeight').checked)$('cgWeight').value=$('weight').value;
+    markDirty();
+  });
+  document.querySelectorAll('input[name="sex"],input[name="renalMode"]').forEach(el=>el.addEventListener('change',markDirty));
+  $('calculateButton').addEventListener('click',calculate);
+  $('clearInputs').addEventListener('click',()=>{
+    ['age','height','weight','cgWeight','scr','cys'].forEach(id=>$(id).value='');
+    $('syncWeight').checked=true;$('cgWeight').disabled=true;$('scrUnit').value='mg/dL';$('cysUnit').value='mg/L';
+    document.querySelector('input[name="sex"][value="male"]').checked=true;
+    document.querySelector('input[name="renalMode"][value="creatinine"]').checked=true;
+    resetCalculatedDisplay('患者数据已清空。');
+  });
+  $('drugSelect').addEventListener('change',()=>renderDrug());
+  $('dbSearch').addEventListener('input',renderDatabaseTable);
+  $('importFile').addEventListener('change',()=>{$('importFileName').textContent=$('importFile').files?.[0]?.name||'尚未选择文件';});
+  $('importButton').addEventListener('click',importDatabaseFile);
+  $('addRecord').addEventListener('click',()=>openRecordModal());
+  $('exportCsv').addEventListener('click',exportCsv);
+  $('exportJson').addEventListener('click',()=>downloadFile('renal_dose_database_backup.json',JSON.stringify(dbState,null,2),'application/json;charset=utf-8'));
+  $('databaseRows').addEventListener('change',event=>{
+    const input=event.target.closest('input[data-qr-upload]');if(!input)return;
+    const row=input.closest('tr'),file=input.files&&input.files[0];
+    const name=row?.querySelector('.qr-row-file-name'),save=row?.querySelector('button[data-action="save-qr"]');
+    if(name)name.textContent=file?file.name:'选择图片后点击保存';
+    if(save)save.disabled=!file||!dbConnected||!dbAuthenticated||publicReadOnly;
+  });
+  $('maintenanceLoginForm').addEventListener('submit',loginMaintenance);
+  $('dbLogoutButton').addEventListener('click',logoutMaintenance);
+  $('databaseRows').addEventListener('click',event=>{
+    const button=event.target.closest('button[data-action]');if(!button)return;
+    if(button.dataset.action==='choose-qr'){
+      const input=button.closest('tr')?.querySelector('input[data-qr-upload]');
+      if(input&&!input.disabled)input.click();
+    }
+    if(button.dataset.action==='edit')openRecordModal(dbRowById(button.dataset.id));
+    if(button.dataset.action==='delete')deleteRecord(button.dataset.id);
+    if(button.dataset.action==='save-qr')saveQrFromRow(button);
+    if(button.dataset.action==='delete-qr')removeQrFromDb(button);
+  });
+  $('recordForm').addEventListener('submit',async event=>{
+    event.preventDefault();
+    const id=$('f-id').value,oldRecord=id?dbRowById(id):null,record={};
+    DB_FIELDS.forEach(key=>record[key]=$(`f-${key}`).value.trim());
+    if(id)record._id=id;
+    const records=usableRows.slice();
+    if(id){const index=records.findIndex(r=>r._id===id);if(index>=0)records[index]=record;else records.push(record);}
+    else records.push(record);
+    const newKey=`${record.drug_id}||${record.drug_name}`,nextQr={...databaseQr};
+    if(oldRecord){
+      const oldKey=`${oldRecord.drug_id}||${oldRecord.drug_name}`;
+      const oldGroupStillExists=records.some(r=>`${r.drug_id}||${r.drug_name}`===oldKey);
+      if(oldKey!==newKey&&!oldGroupStillExists&&nextQr[oldKey]&&!nextQr[newKey]){nextQr[newKey]=nextQr[oldKey];delete nextQr[oldKey];}
+    }
+    try{await saveRecords(records,newKey,nextQr);closeRecordModal();}
+    catch(error){setDbStatus(error.message,'error');}
+  });
+  $('closeRecordModal').addEventListener('click',closeRecordModal);
+  $('cancelRecord').addEventListener('click',closeRecordModal);
+  $('recordModal').addEventListener('click',event=>{if(event.target?.dataset?.closeModal)closeRecordModal();});
+
+  function switchView(view){
+    const views={home:'homeView',calculator:'calculatorView',database:'databaseView'};
+    if(!views[view])return;
+    Object.entries(views).forEach(([key,id])=>$(id).classList.toggle('hidden',key!==view));
+    $('calcSubnav').classList.toggle('hidden',view!=='calculator');
+    document.querySelectorAll('.nav-view').forEach(button=>{
+      const active=button.dataset.view===view;button.classList.toggle('active',active);
+      if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
+    });
+    document.title='肾功能与抗肿瘤剂量计算辅助平台';
+    if(view==='database'){checkMaintenanceAuth();loadDatabase(selectedDrugKey());}
+    else if(view==='calculator')loadDatabase(selectedDrugKey());
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>switchView(button.dataset.view)));
+  rebuildGroups();populateSelect('',groups[0]?.key||'');
+  $('cgWeight').disabled=true;
+  renderDatabaseTable();resetCalculatedDisplay('');
+  loadDatabase();checkMaintenanceAuth();
+})();
+</script>
+</body>
+</html>
