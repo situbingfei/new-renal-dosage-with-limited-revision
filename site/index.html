@@ -387,12 +387,13 @@ tbody tr:last-child td{border-bottom:0}
       <div class="section-heading"><div class="section-number">01</div><div><h2>患者与检验数据</h2><p>填写资料后点击“计算结果”，再查看肾功能与剂量匹配</p></div></div>
       <div class="form-grid">
         <label class="field full"><span class="field-label">选择药品 <small>从数据库下拉选择</small></span><span class="control select-wrap"><select id="drugSelect" aria-label="选择药品"></select></span><span class="input-help">药品剂量规则来自“数据库维护”；选择药品后，计算结果区会显示对应的匹配资料。</span></label>
+        <label class="field full hidden" id="carboplatinAucField"><span class="field-label">卡铂目标 AUC</span><span class="control"><input id="carboplatinAuc" type="number" min="0.1" step="0.1" inputmode="decimal" placeholder="例如 5" aria-label="卡铂目标AUC"><span class="suffix">AUC</span></span><span class="input-help">仅选择卡铂时显示。填写目标 AUC 后点击“计算结果”；公式还需要年龄、血肌酐和 Cockcroft–Gault 计算体重。</span></label>
         <label class="field"><span class="field-label">年龄 <small>成人公式</small></span><span class="control"><input id="age" type="number" min="18" max="120" step="1" inputmode="numeric" placeholder="例如 65" aria-label="年龄（岁）"><span class="suffix">岁</span></span></label>
         <div class="field"><span class="field-label">公式性别系数</span><div class="sex-options"><label class="sex-option"><input type="radio" name="sex" value="male" checked><span>男性</span></label><label class="sex-option"><input type="radio" name="sex" value="female"><span>女性</span></label></div></div>
         <div class="field full"><span class="field-label">肾功能估算方式 <small>选择本次区间匹配值的来源</small></span><div class="method-options" role="radiogroup" aria-label="肾功能估算方式"><label class="method-option"><input type="radio" name="renalMode" value="creatinine" checked><span><b>血肌酐</b><small>Cockcroft–Gault CrCl</small></span></label><label class="method-option"><input type="radio" name="renalMode" value="cystatin"><span><b>胱抑素 C</b><small>CKD-EPI 2012 eGFRcys</small></span></label><label class="method-option"><input type="radio" name="renalMode" value="combined"><span><b>两者联合</b><small>CKD-EPI 2021 eGFRcr-cys</small></span></label></div><span class="input-help" id="modeHint">血肌酐模式计算 Cockcroft–Gault CrCl；胱抑素 C 或联合模式计算的是 eGFR，去标化后仅作为 CSV CrCl 区间的代理值。</span></div>
         <label class="field"><span class="field-label">身高</span><span class="control"><input id="height" type="number" min="50" max="250" step="0.1" inputmode="decimal" placeholder="例如 170" aria-label="身高（厘米）"><span class="suffix">cm</span></span></label>
         <label class="field"><span class="field-label">实际体重</span><span class="control"><input id="weight" type="number" min="2" max="350" step="0.1" inputmode="decimal" placeholder="例如 65" aria-label="实际体重（千克）"><span class="suffix">kg</span></span></label>
-        <label class="field full"><span class="field-label">Cockcroft–Gault 计算体重 <small>仅血肌酐模式需要</small></span><span class="control"><input id="cgWeight" type="number" min="2" max="350" step="0.1" inputmode="decimal" placeholder="默认跟随实际体重" aria-label="Cockcroft-Gault计算体重（千克）"><span class="suffix">kg</span></span><span class="weight-sync"><input id="syncWeight" type="checkbox" checked> 与实际体重联动（肥胖/水肿/消瘦等情况请按临床方案选择计算体重）</span></label>
+        <label class="field full"><span class="field-label">Cockcroft–Gault 计算体重 <small>血肌酐模式及卡铂 AUC 公式需要</small></span><span class="control"><input id="cgWeight" type="number" min="2" max="350" step="0.1" inputmode="decimal" placeholder="默认跟随实际体重" aria-label="Cockcroft-Gault计算体重（千克）"><span class="suffix">kg</span></span><span class="weight-sync"><input id="syncWeight" type="checkbox" checked> 与实际体重联动（肥胖/水肿/消瘦等情况请按临床方案选择计算体重）</span></label>
         <label class="field full"><span class="field-label">血肌酐 SCr</span><span class="inline-control"><span class="control"><input id="scr" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="例如 1.0" aria-label="血肌酐"></span><span class="control unit-control"><select id="scrUnit" aria-label="血肌酐单位"><option value="mg/dL">mg/dL</option><option value="umol/L">µmol/L</option></select></span></span><span class="input-help">可用于 Cockcroft–Gault、CKD-EPI 2021 肌酐单项，或联合公式。</span></label>
         <label class="field full"><span class="field-label">胱抑素 C CysC</span><span class="inline-control"><span class="control"><input id="cys" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="例如 1.0" aria-label="胱抑素C"></span><span class="control unit-control"><select id="cysUnit" aria-label="胱抑素C单位"><option value="mg/L">mg/L</option><option value="mg/dL">mg/dL</option></select></span></span><span class="input-help">可用于 CKD-EPI 2012 胱抑素 C 单项或 CKD-EPI 2021 联合公式；mg/dL 输入会换算为 mg/L。</span></label>
       </div>
@@ -443,6 +444,7 @@ tbody tr:last-child td{border-bottom:0}
     <div class="formula-block"><h3>4 · 肌酐 + 胱抑素 C 联合 eGFR（CKD-EPI 2021；mL/min/1.73m²）</h3><code class="formula">eGFRcr-cys = 135 × min(SCr/κ,1)^α × max(SCr/κ,1)^−0.544 × min(CysC/0.8,1)^−0.323 × max(CysC/0.8,1)^−0.778 × 0.9961^年龄 × (女性 × 0.963)</code><p class="formula-note">SCr 单位 mg/dL；CysC 单位 mg/L。κ：女性 0.7、男性 0.9；α：女性 −0.219、男性 −0.144。KDIGO G 分类使用标准化 eGFR（未去标化）。</p></div>
     <div class="formula-block"><h3>5 · eGFR 去标化（仅作为 CSV CrCl 区间的代理比较）</h3><code class="formula">绝对 eGFR (mL/min) = eGFR (mL/min/1.73m²) × Mosteller BSA (m²) ÷ 1.73</code><p class="formula-note">胱抑素 C 单项/联合模式用该绝对 eGFR 尝试对照 CSV CrCl 范围，但它不等于 Cockcroft–Gault CrCl；页面会在剂量匹配处持续标示此限制，结果仅供核对。机构、药品说明书或临床方案规定其他方法时，应以其要求为准。</p></div>
     <div class="formula-block"><h3>6 · 体表面积（BSA）</h3><code class="formula">Mosteller：BSA(m²) = √[身高(cm) × 体重(kg) ÷ 3600]</code><code class="formula">Du Bois：BSA(m²) = 0.007184 × 身高(cm)^0.725 × 体重(kg)^0.425</code><p class="formula-note">页面会同时显示两种估算值。mg/m² 的结构化剂量分别按两种 BSA 换算；eGFR 去标化固定使用 Mosteller BSA。最终方法与剂量取整应遵循具体方案/机构规范。</p></div>
+    <div class="formula-block"><h3>7 · 卡铂 AUC 总剂量辅助计算（按本页指定方法）</h3><code class="formula">卡铂总剂量 (mg) = (Cockcroft–Gault CrCl (mL/min) + 25) × 目标 AUC</code><p class="formula-note">页面按用户指定方法使用 Cockcroft–Gault CrCl。传统 Calvert 公式中的肾功能项为 GFR，CrCl 与 GFR 并非完全等同；本结果仅作辅助估算，不自动套用上限、方案调整或剂量取整。请按临床方案/机构规范复核。</p></div>
     <div class="formula-block"><h3>剂量换算规则</h3><p class="formula-note">仅使用 CSV 的 <b>ccr_min / ccr_max</b> 区间和结构化剂量单位。血肌酐模式用 CrCl 直接匹配；CysC/联合模式按去标化绝对 eGFR 作为非等价代理值匹配。mg/m² × BSA；mg/kg × 实际体重；mg 固定值原样显示；mg/d 标为日剂量而非单次剂量。源数据存在单位/数值矛盾、无剂量值、混合单位、仅有文字建议或当前值无匹配区间时，不补写/外推剂量。</p></div>
     <div class="reference-grid" style="margin-top:13px">
       <article class="reference-item"><h3>CrCl · Cockcroft & Gault, 1976</h3><p>Cockcroft DW, Gault MH. Prediction of creatinine clearance from serum creatinine. <i>Nephron.</i> 1976;16(1):31–41. <a href="https://pubmed.ncbi.nlm.nih.gov/1244564/" target="_blank" rel="noopener">PubMed 1244564</a></p></article>
@@ -547,9 +549,16 @@ let DATA_ROWS = [{"drug_id":"cisplatin","drug_name":"顺铂","renal_function_lev
     $('catalogCount').textContent=`载入 ${groups.length} 个药品条目 · ${usableRows.length} 条原始剂量资料`;
   }
 
-  const state = { calculated:false, mode:'creatinine', age:null, sex:'male', height:null, weight:null, cgWeight:null, scr:null, cys:null, matchValue:null, matchSource:'', egfrIndexed:null, egfrScr:null, egfrCys:null, egfrCombined:null, mosteller:null, dubois:null, stage:null };
+  const state = { calculated:false, mode:'creatinine', age:null, sex:'male', height:null, weight:null, cgWeight:null, scr:null, cys:null, crcl:null, matchValue:null, matchSource:'', egfrIndexed:null, egfrScr:null, egfrCys:null, egfrCombined:null, mosteller:null, dubois:null, stage:null };
   const selectedDrugKey = () => $('drugSelect').value;
   const currentGroup = () => byKey.get(selectedDrugKey()) || null;
+  function isCarboplatin(group=currentGroup()){
+    return !!group && (String(group.id||'').trim().toLowerCase()==='carboplatin' || String(group.name||'').trim()==='卡铂');
+  }
+  function updateCarboplatinAucVisibility(){
+    const field=$('carboplatinAucField');
+    if(field)field.classList.toggle('hidden',!isCarboplatin());
+  }
   const dbRowById = (id) => usableRows.find(r => r._id === id) || null;
 
   function activeSex(){ return document.querySelector('input[name="sex"]:checked')?.value || 'male'; }
@@ -588,7 +597,7 @@ let DATA_ROWS = [{"drug_id":"cisplatin","drug_name":"顺铂","renal_function_lev
     }
   }
   function resetCalculatedDisplay(message='资料已修改，请点击“计算结果”更新。'){
-    state.calculated=false;state.matchValue=null;state.egfrIndexed=null;state.egfrScr=null;state.egfrCys=null;state.egfrCombined=null;state.mosteller=null;state.dubois=null;state.stage=null;state.matchSource='';
+    state.calculated=false;state.crcl=null;state.matchValue=null;state.egfrIndexed=null;state.egfrScr=null;state.egfrCys=null;state.egfrCombined=null;state.mosteller=null;state.dubois=null;state.stage=null;state.matchSource='';
     setMetric('matchValue',null,3);setMetric('egfrValue',null,3);setBsaMetric('mostellerValue',null);setBsaMetric('duboisValue',null);
     const chip=$('stageChip');chip.className='stage-chip';chip.textContent='待计算';
     document.querySelectorAll('.stage-step').forEach(el=>el.classList.remove('is-active'));
@@ -610,7 +619,7 @@ let DATA_ROWS = [{"drug_id":"cisplatin","drug_name":"顺铂","renal_function_lev
     let crcl=null,egfrScr=null,egfrCys=null,egfrCombined=null;
     if(ageOK&&scrOK){
       const female=sex==='female',k=female?0.7:0.9,alpha=female?-0.241:-0.302;
-      crcl=mode==='creatinine'&&cgW!==null&&cgW>0?((140-age)*cgW/(72*scr))*(female?0.85:1):null;
+      crcl=cgW!==null&&cgW>0?((140-age)*cgW/(72*scr))*(female?0.85:1):null;
       egfrScr=142*Math.pow(Math.min(scr/k,1),alpha)*Math.pow(Math.max(scr/k,1),-1.200)*Math.pow(0.9938,age)*(female?1.012:1);
     }
     if(ageOK&&cysOK){
@@ -624,7 +633,7 @@ let DATA_ROWS = [{"drug_id":"cisplatin","drug_name":"顺铂","renal_function_lev
     const egfrIndexed=mode==='creatinine'?egfrScr:(mode==='cystatin'?egfrCys:egfrCombined);
     const matchValue=mode==='creatinine'?crcl:(egfrIndexed!==null&&mosteller!==null?egfrIndexed*mosteller/1.73:null);
     const requiredOk=ageOK&&(mode==='creatinine'?(scrOK&&cgW!==null&&cgW>0):(mode==='cystatin'?cysOK:(scrOK&&cysOK)));
-    state.calculated=true;state.mode=mode;state.age=age;state.sex=sex;state.height=h;state.weight=w;state.cgWeight=cgW;state.scr=scr;state.cys=cys;
+    state.calculated=true;state.mode=mode;state.age=age;state.sex=sex;state.height=h;state.weight=w;state.cgWeight=cgW;state.scr=scr;state.cys=cys;state.crcl=crcl;
     state.matchValue=requiredOk?matchValue:null;state.matchSource=mode;state.egfrIndexed=egfrIndexed;state.egfrScr=egfrScr;state.egfrCys=egfrCys;state.egfrCombined=egfrCombined;state.mosteller=mosteller;state.dubois=dubois;state.stage=egfrIndexed===null?null:stageFor(egfrIndexed);
     setMetric('matchValue',state.matchValue,3);setMetric('egfrValue',egfrIndexed,3);setBsaMetric('mostellerValue',mosteller);setBsaMetric('duboisValue',dubois);
     const chip=$('stageChip');chip.className='stage-chip';
@@ -638,6 +647,12 @@ let DATA_ROWS = [{"drug_id":"cisplatin","drug_name":"顺铂","renal_function_lev
     if(mode==='cystatin'&&!cysOK)missing.push('胱抑素 C 需大于 0');
     if(mode==='combined'&&(!scrOK||!cysOK))missing.push('联合计算需同时填写血肌酐和胱抑素 C');
     if(mode!=='creatinine'&&egfrIndexed!==null&&mosteller===null)missing.push('eGFR 已算出；需填写身高与体重才能去标化并匹配 CSV 区间');
+    if(isCarboplatin()){
+      if(!scrOK)missing.push('卡铂 AUC 公式还需血肌酐 SCr');
+      if(cgW===null||cgW<=0)missing.push('卡铂 AUC 公式还需 Cockcroft–Gault 计算体重');
+      const aucInput=toNum($('carboplatinAuc').value);
+      if(aucInput===null||aucInput<=0)missing.push('请输入大于 0 的卡铂目标 AUC');
+    }
     $('validationMessage').textContent=missing.length?`　${missing.join('；')}。`:'';
     $('calcStatus').textContent=state.matchValue!==null?'已计算 · 可查看剂量匹配':(state.stage?'已计算 eGFR · 尚不能匹配剂量':'缺少必需数据');
     updateModeCopy();renderDrug();
@@ -737,14 +752,25 @@ let DATA_ROWS = [{"drug_id":"cisplatin","drug_name":"顺铂","renal_function_lev
     if(!group)return '';
     return `<div class="source-table-wrap"><div class="table-caption"><span>该药在上传 CSV 中的全部记录</span><small>范围按原数字字段展示；999 视作开放上限</small></div><div class="table-scroll"><table><thead><tr><th>肾功能字段</th><th>CrCl 数值范围</th><th>剂量字段 / 原文</th><th>具体意见</th><th>特别提示</th></tr></thead><tbody>${group.rows.map(r=>`<tr><td>${esc(r.renal_function_level||'未标注')}</td><td>${esc(intervalText(r))}</td><td>${esc(rowDoseSummary(r))}</td><td>${esc(r.adjustment_rule||'—')}</td><td>${esc(r.special_notes||'—')}</td></tr>`).join('')}</tbody></table></div></div>`;
   }
+  function renderCarboplatinDoseCard(group){
+    if(!isCarboplatin(group))return '';
+    const auc=toNum($('carboplatinAuc').value);
+    if(!state.calculated)return `<div class="dose-alert info"><b>卡铂 AUC 总剂量辅助计算：</b>输入目标 AUC，并填写年龄、血肌酐及 Cockcroft–Gault 计算体重后，点击“计算结果”。</div>`;
+    if(auc===null||auc<=0)return `<div class="dose-alert info"><b>卡铂 AUC 总剂量辅助计算：</b>请输入大于 0 的目标 AUC，再点击“计算结果”。</div>`;
+    if(state.crcl===null||!Number.isFinite(state.crcl))return `<div class="dose-alert danger"><b>无法计算卡铂总剂量：</b>需要有效的年龄、血肌酐和 Cockcroft–Gault 计算体重；公式不使用 CysC/eGFR 代替 CrCl。</div>`;
+    const total=(state.crcl+25)*auc;
+    return `<article class="match-card"><div class="match-head"><div><h3>卡铂总剂量（AUC 辅助计算）</h3><p class="match-level">按 Cockcroft–Gault CrCl 计算</p></div><span class="match-range">公式辅助值</span></div><div class="calc-box full fixed"><span class="calc-label">(CrCl + 25) × AUC</span><strong>${fmt(total,1)} mg</strong><small>(${fmt(state.crcl,3)} mL/min + 25) × AUC ${fmt(auc,2)} = ${fmt(total,1)} mg；结果显示至 1 位小数，未执行方案剂量上限或临床取整。</small></div><p class="calc-caution">传统 Calvert 公式的肾功能项为 GFR，Cockcroft–Gault CrCl 与 GFR 并非完全等同。此结果按本页指定的 CrCl 代入方式生成，仅作辅助估算；请按临床方案/机构规范复核。</p></article>`;
+  }
   function renderDrug(){
     const group=currentGroup(),output=$('doseOutput');
+    updateCarboplatinAucVisibility();
     if(!group){output.innerHTML='<div class="empty-state"><span class="empty-icon">Rx</span><span>没有找到对应药品。请更换搜索词。</span></div>'; $('sourceTable').innerHTML=''; updateQr(); return;}
+    const carboplatinCard=renderCarboplatinDoseCard(group);
     if(!state.calculated){
-      output.innerHTML=`<div class="dose-alert info">请先填写所选估算方式需要的患者/检验资料，再点击“计算结果”。</div><div class="empty-state"><span class="empty-icon">↳</span><span><b>${esc(group.name)}</b>：计算完成后，才会用本次区间匹配值检索 CSV 规则。</span></div>`;
+      output.innerHTML=`${carboplatinCard}<div class="dose-alert info">请先填写所选估算方式需要的患者/检验资料，再点击“计算结果”。</div><div class="empty-state"><span class="empty-icon">↳</span><span><b>${esc(group.name)}</b>：计算完成后，才会用本次区间匹配值检索 CSV 规则。</span></div>`;
     }else if(state.matchValue===null){
       const detail=state.mode==='creatinine'?'此模式需年龄、血肌酐及 Cockcroft–Gault 计算体重。':'CysC/联合 eGFR 可显示标准化结果；要作为绝对值代理匹配 CSV，还需年龄、相应检验值、身高与实际体重。';
-      output.innerHTML=`<div class="dose-alert info">尚无可用于药品区间匹配的数值。${esc(detail)} 请查看计算结果区的缺项提示并补齐资料。</div><div class="empty-state"><span class="empty-icon">!</span><span>没有匹配值时不提供剂量匹配结果；不会用其他指标自动替代。</span></div>`;
+      output.innerHTML=`${carboplatinCard}<div class="dose-alert info">尚无可用于药品区间匹配的数值。${esc(detail)} 请查看计算结果区的缺项提示并补齐资料。</div><div class="empty-state"><span class="empty-icon">!</span><span>没有匹配值时不提供剂量匹配结果；不会用其他指标自动替代。</span></div>`;
     }else{
       const matches=matchRows(group,state.matchValue);
       const proxy=state.mode!=='creatinine';
@@ -752,10 +778,10 @@ let DATA_ROWS = [{"drug_id":"cisplatin","drug_name":"顺铂","renal_function_lev
       const caution=proxy?'该值为 eGFR × Mosteller BSA / 1.73，用作 CSV CrCl 区间的非等价代理；与 CrCl 可能不同，需人工核实。':'仅使用上传文件的结构化 CrCl 数值区间（端点按包含处理）。';
       if(matches.length){
         const overlap=matches.length>1?`<div class="dose-alert">源数据区间有重叠，当前匹配值命中 ${matches.length} 条；页面逐条原样列出，不自行选择其中一条。</div>`:'';
-        output.innerHTML=`<div class="dose-alert ${proxy?'':'info'}">用于本次匹配的${metricName}：<b>${fmt(state.matchValue,3)} mL/min</b>。${caution}</div>${overlap}${matches.map(renderMatch).join('')}`;
+        output.innerHTML=`${carboplatinCard}<div class="dose-alert ${proxy?'':'info'}">用于本次匹配的${metricName}：<b>${fmt(state.matchValue,3)} mL/min</b>。${caution}</div>${overlap}${matches.map(renderMatch).join('')}`;
       }else{
         const hasRanges=group.rows.some(r=>toNum(r.ccr_min)!==null||toNum(r.ccr_max)!==null);
-        output.innerHTML=`<div class="dose-alert ${hasRanges?'danger':'info'}">本次${metricName}为 <b>${fmt(state.matchValue,3)} mL/min</b>。${hasRanges?'未命中该药在 CSV 中的任一结构化区间，不跨区间外推。':'上传数据未提供该药按 CrCl 分层的规则，不自动推算剂量。'} ${caution}</div><div class="empty-state"><span class="empty-icon">!</span><span>请核对药品现行说明书和临床方案。该药的 CSV 原始记录仍列在下方供查看。</span></div>`;
+        output.innerHTML=`${carboplatinCard}<div class="dose-alert ${hasRanges?'danger':'info'}">本次${metricName}为 <b>${fmt(state.matchValue,3)} mL/min</b>。${hasRanges?'未命中该药在 CSV 中的任一结构化区间，不跨区间外推。':'上传数据未提供该药按 CrCl 分层的规则，不自动推算剂量。'} ${caution}</div><div class="empty-state"><span class="empty-icon">!</span><span>请核对药品现行说明书和临床方案。该药的 CSV 原始记录仍列在下方供查看。</span></div>`;
       }
     }
     $('sourceTable').innerHTML=renderSourceTable(group);updateQr();
@@ -971,6 +997,7 @@ let DATA_ROWS = [{"drug_id":"cisplatin","drug_name":"顺铂","renal_function_lev
 
   // Explicit calculation button: edits invalidate previous results until recalculated.
   const markDirty=()=>resetCalculatedDisplay('输入已更改，点击“计算结果”后再查看剂量匹配。');
+  $('carboplatinAuc').addEventListener('input',markDirty);
   ['age','height','weight','scr','cys'].forEach(id=>$(id).addEventListener('input',()=>{
     if(id==='weight'&&$('syncWeight').checked)$('cgWeight').value=$('weight').value;
     markDirty();
@@ -985,7 +1012,7 @@ let DATA_ROWS = [{"drug_id":"cisplatin","drug_name":"顺铂","renal_function_lev
   document.querySelectorAll('input[name="sex"],input[name="renalMode"]').forEach(el=>el.addEventListener('change',markDirty));
   $('calculateButton').addEventListener('click',calculate);
   $('clearInputs').addEventListener('click',()=>{
-    ['age','height','weight','cgWeight','scr','cys'].forEach(id=>$(id).value='');
+    ['age','height','weight','cgWeight','scr','cys','carboplatinAuc'].forEach(id=>$(id).value='');
     $('syncWeight').checked=true;$('cgWeight').disabled=true;$('scrUnit').value='mg/dL';$('cysUnit').value='mg/L';
     document.querySelector('input[name="sex"][value="male"]').checked=true;
     document.querySelector('input[name="renalMode"][value="creatinine"]').checked=true;
@@ -1060,5 +1087,5 @@ let DATA_ROWS = [{"drug_id":"cisplatin","drug_name":"顺铂","renal_function_lev
   loadDatabase();checkMaintenanceAuth();
 })();
 </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4d694148f6daebe',t:'MTc5MjQ4NDE2NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
